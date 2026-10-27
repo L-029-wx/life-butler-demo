@@ -331,7 +331,7 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;
 
 const DEMO = window.__DEMO__ || {};
 /* 数据源优先级：① 隧道（云端页面用）② 本机 8100（本地打开时用）③ 内置快照（两者都不通时） */
-const LIVE_BASES = ["https://interview-erp-namely-luxury.trycloudflare.com", "http://127.0.0.1:8100"];
+const LIVE_BASES = (location.protocol === "file:") ? ["http://127.0.0.1:8100"] : ["", "http://127.0.0.1:8100"];
 let LIVE_BASE = null, DATA_SRC = "内置快照";
 
 async function _probe() {
