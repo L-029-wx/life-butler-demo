@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>后台管理 · 电子生活管家</title>
+<style>
+:root{--ink:#0f172a;--body:#334155;--mut:#64748b;--line:#e2e8f0;--bg:#f5f7fb;--card:#fff;
+--pri:#6366f1;--ok:#059669;--warn:#d97706;--err:#dc2626}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);
+ font:13.5px/1.65 "Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif}
+.app{display:flex;min-height:100vh}
+aside{width:186px;background:#0f172a;color:#cbd5e1;padding:16px 0;flex:0 0 186px}
+.brand{display:flex;align-items:center;gap:9px;padding:0 16px 16px}
+.logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#0ea5e9);
+ color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.brand b{color:#fff;font-size:13.5px;display:block;line-height:1.25}
+.brand small{font-size:10.5px;color:#64748b}
+nav a{display:block;padding:8px 18px;color:#94a3b8;text-decoration:none;font-size:13px;
+ border-left:3px solid transparent;cursor:pointer}
+nav a:hover{background:#1e293b;color:#e2e8f0}
+nav a.on{background:#1e293b;color:#fff;border-left-color:#6366f1}
+.side-foot{margin-top:auto;padding:14px 16px;font-size:11px;color:#475569}
+main{flex:1;padding:18px 22px 40px;min-width:0}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.top h1{margin:0;font-size:19px;color:var(--ink)}
+.pill{font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--mut)}
+.pill.ok{color:var(--ok);border-color:#a7f3d0;background:#ecfdf5}
+.pill.err{color:var(--err);border-color:#fecaca;background:#fef2f2}
+.login{margin-left:auto;display:flex;gap:7px;align-items:center;font-size:12.5px}
+.login input{border:1px solid var(--line);border-radius:7px;padding:5px 9px;font-size:12.5px;width:130px;background:#fff}
+button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--body);
+ border-radius:7px;padding:5px 12px;cursor:pointer}
+button:hover{background:#f8fafc}
+button.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
+button.pri:hover{filter:brightness(1.08)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:11px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+.kpi span{font-size:11.5px;color:var(--mut);display:block}
+.kpi b{font-size:21px;color:var(--ink);line-height:1.25}
+.kpi small{font-size:11px;color:#94a3b8}
+.kpi.warn b{color:var(--warn)} .kpi.err b{color:var(--err)} .kpi.ok b{color:var(--ok)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.panel h2{margin:0 0 10px;font-size:14.5px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.panel h2 small{margin-left:auto;font-weight:400;font-size:11.5px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:#f8fafc;color:var(--mut);font-size:11px;text-align:left;padding:7px 9px;
+ border-bottom:1px solid var(--line);white-space:nowrap;font-weight:600}
+td{padding:7px 9px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:#fafbff}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;color:#4338ca}
+.tag{font-size:11px;padding:1px 7px;border-radius:5px;background:#f1f5f9;color:#475569}
+.tag.l1{background:#fef2f2;color:var(--err)} .tag.l2{background:#fffbeb;color:var(--warn)}
+.tag.ok{background:#ecfdf5;color:var(--ok)}
+.grid2{display:grid;grid-template-columns:300px 1fr;gap:14px}
+.api-list{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:9px}
+.api-list div{padding:6px 10px;font-size:12px;cursor:pointer;border-bottom:1px solid #f8fafc;
+ display:flex;gap:7px;align-items:center}
+.api-list div:hover{background:#f8fafc}
+.api-list div.on{background:#eef2ff;color:#4338ca}
+.m{font-size:10px;font-weight:700;padding:0 5px;border-radius:3px;color:#fff;flex:0 0 auto}
+.m.get{background:#0ea5e9} .m.post{background:#059669} .m.put{background:#d97706} .m.patch{background:#7c3aed}
+pre{margin:0;background:#0f172a;color:#cbd5e1;border-radius:9px;padding:12px 14px;
+ font-size:11.5px;line-height:1.6;overflow:auto;max-height:520px}
+.hint{font-size:12px;color:var(--mut);margin:6px 0 0}
+.err{color:var(--err)}
+</style></head><body><div style="background:#1a2130;color:#e8eef6;font-size:13px;padding:8px 16px;text-align:center">管理台 · 线上演示版（实时数据来自本机数据库，只读）</div>
+<div class="app">
+<aside>
+  <div class="brand"><div class="logo">管</div><div><b>电子生活管家</b><small>后台管理</small></div></div>
+  <nav id="nav">
+    <a data-v="overview" class="on">概览</a>
+    <a data-v="devices">设备管理</a>
+    <a data-v="emergency">应急处置</a>
+    <a data-v="analysis">分析建议</a>
+    <a data-v="settings">基础设置</a>
+    
+  </nav>
+  <div class="side-foot">接真实后端<br><span id="api-host">127.0.0.1:8100</span></div>
+</aside>
+<main>
+  <div class="top">
+    <h1 id="title">概览</h1>
+    <span class="pill" id="p-db">数据库 —</span>
+    <span class="pill" id="p-ver">版本 —</span>
+    <div class="login">
+      <input id="u" placeholder="账号" autocomplete="username">
+      <input id="p" type="password" placeholder="密码" autocomplete="current-password">
+      <span class="tag" style="font-size:12px">演示 · 只读</span><button id="btnLogin" style="display:none"></button>
+      <span id="who" style="color:var(--mut)">未登录</span>
+    </div>
+  </div>
+  <div id="view"></div>
+</main>
+</div>
+<script>
+const API = "";   // 同源，走 Pages 代理
+let TOKEN = localStorage.getItem("lb_token") || "";
+let USER  = localStorage.getItem("lb_user") || "";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function api(path, opt = {}) {
+  const h = { "Content-Type": "application/json" };
+  if (TOKEN) h["Authorization"] = "Bearer " + TOKEN;
+  const r = await fetch(API + path, { ...opt, headers: h, cache: "no-store" });
+  const txt = await r.text();
+  let body; try { body = JSON.parse(txt); } catch { body = txt; }
+  if (!r.ok) throw new Error((body && body.detail) || ("HTTP " + r.status));
+  return body;
+}
+
+function setWho() {
+  $("#who").textContent = TOKEN ? ("已登录 " + USER) : "未登录";
+  $("#who").style.color = TOKEN ? "var(--ok)" : "var(--mut)";
+}
+
+/* ---------------- 视图 ---------------- */
+const TITLES = { overview: "概览", devices: "设备管理", emergency: "应急处置",
+                 analysis: "分析建议", settings: "基础设置", api: "接口调试" };
+
+async function vOverview() {
+  const [h, ds, em, su, fi, fl] = await Promise.all([
+    api("/healthz"), api("/api/devices/stats"), api("/api/emergency/stats"),
+    api("/api/analysis/summary"), api("/api/analysis/findings"), api("/api/analysis/flqi")]);
+  $("#p-db").textContent = "数据库 " + (h.db === "up" ? "正常" : "异常");
+  $("#p-db").className = "pill " + (h.db === "up" ? "ok" : "err");
+  $("#p-ver").textContent = "版本 " + h.version;
+  $("#view").innerHTML = `
+  <div class="cards">
+    <div class="kpi"><span>设备点位</span><b>${ds.total}</b><small>${ds.base_count} 件基础配置</small></div>
+    <div class="kpi ok"><span>在线</span><b>${ds.online}</b><small>离线 ${ds.total - ds.online}</small></div>
+    <div class="kpi warn"><span>低电量</span><b>${ds.low_battery}</b><small>低于 30%</small></div>
+    <div class="kpi err"><span>待确认应急</span><b>${em.pending}</b><small>共 ${em.total} 条</small></div>
+    <div class="kpi"><span>分析发现</span><b>${fi.count}</b><small>高 1 / 中 3 / 低 4</small></div>
+    <div class="kpi"><span>FLQI</span><b>${fl.total}</b><small>六项等权</small></div>
+    <div class="kpi"><span>周用电</span><b>${su.week_kwh}</b><small>kWh · ${su.range.start}~${su.range.end}</small></div>
+    <div class="kpi"><span>周电费</span><b>¥${su.week_yuan}</b><small>均价 ¥${su.avg_price}/kWh</small></div>
+  </div>
+  <div class="panel"><h2>峰谷结构 <small>峰谷比 ${su.peak_valley_ratio}（只用电量，不含电价）</small></h2>
+    <table><thead><tr><th>时段</th><th>电量 kWh</th><th>占比</th></tr></thead><tbody>
+    ${[["峰","peak"],["平","flat"],["谷","valley"]].map(([k, key]) => {
+      const v = Number(su.tariff_kwh[key]), tot = Number(su.week_kwh);
+      return `<tr><td>${k}</td><td class="mono">${v.toFixed(2)}</td><td>${(v/tot*100).toFixed(1)}%</td></tr>`;
+    }).join("")}
+    </tbody></table></div>
+  <div class="panel"><h2>数据链路 <small>Hive 明细 → MySQL 服务层 → API</small></h2>
+    <p class="hint">MySQL 29 张表 · 接口 50 个 · 判定与表达分离 · 结论可回溯</p></div>`;
+}
+
+async function vDevices() {
+  const [ds, devs] = await Promise.all([api("/api/devices/stats"), api("/api/devices?limit=40")]);
+  $("#view").innerHTML = `
+  <div class="cards">
+    <div class="kpi"><span>点位</span><b>${ds.total}</b></div>
+    <div class="kpi ok"><span>在线</span><b>${ds.online}</b></div>
+    <div class="kpi warn"><span>低电量</span><b>${ds.low_battery}</b></div>
+    <div class="kpi"><span>红外转发</span><b>${ds.ir_count}</b></div>
+    <div class="kpi"><span>基础配置成本</span><b>¥${ds.base_cost_yuan}</b></div>
+  </div>
+  <div class="panel"><h2>设备清单 <small>能力声明字段决定接入映射</small></h2>
+  <table><thead><tr><th>#</th><th>设备</th><th>房间</th><th>类型</th><th>分析域</th>
+  <th>状态</th><th>电量</th><th>单价</th></tr></thead><tbody>
+  ${devs.map(d => `<tr>
+    <td class="mono">${d.no}</td><td>${esc(d.short_name)}</td><td>${esc(d.room_name)}</td>
+    <td><span class="tag">${esc(d.kind)}</span></td><td>${esc(d.analysis_domain || "—")}</td>
+    <td>${d.online ? '<span class="tag ok">在线</span>' : '<span class="tag l1">离线</span>'}</td>
+    <td>${d.battery_pct == null ? "—" : d.battery_pct + "%"}</td>
+    <td>${d.price == null ? "需电工" : "¥" + d.price}</td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+
+async function vEmergency() {
+  const [em, ev] = await Promise.all([api("/api/emergency/stats"), api("/api/emergency/events")]);
+  $("#view").innerHTML = `
+  <div class="cards">
+    <div class="kpi"><span>事件</span><b>${em.total}</b></div>
+    <div class="kpi err"><span>一级</span><b>${em.level_1}</b><small>立即处置</small></div>
+    <div class="kpi warn"><span>二级</span><b>${em.level_2}</b><small>提醒观察</small></div>
+    <div class="kpi"><span>待确认</span><b>${em.pending}</b></div>
+    <div class="kpi ok"><span>误报</span><b>${em.false_positive}</b></div>
+  </div>
+  <div class="panel"><h2>应急事件 <small>${TOKEN ? "可处置" : "登录后可处置"}</small></h2>
+  <table><thead><tr><th>编号</th><th>等级</th><th>类型</th><th>位置</th><th>时间</th>
+  <th>时长</th><th>状态</th><th>操作</th></tr></thead><tbody>
+  ${ev.items.map(e => `<tr>
+    <td class="mono">${e.code}</td>
+    <td><span class="tag ${e.level === "一级" ? "l1" : "l2"}">${e.level}</span></td>
+    <td>${esc(e.event_type)}</td><td>${esc(e.location)}</td>
+    <td class="mono">${String(e.start_at).slice(5,16)}</td><td>${e.duration_min}min</td>
+    <td>${e.status === "待确认" ? "待确认" : '<span class="tag ok">' + e.status + "</span>"}</td>
+    <td><button data-ack="${e.code}" data-st="已确认" ${e.status !== "待确认" ? "disabled" : ""}>确认</button>
+        <button data-ack="${e.code}" data-st="误报" ${e.status !== "待确认" ? "disabled" : ""}>误报</button></td>
+  </tr>`).join("")}
+  </tbody></table>
+  <p class="hint">判据可回溯：每条事件都带 evidence 与 signals 字段，展开可见原始依据。</p></div>`;
+  document.querySelectorAll("[data-ack]").forEach(b => b.onclick = async () => {
+    toast("这是线上演示版：只开放只读查询，处置动作请在本地环境演示"); return;
+    try {
+      const r = await api(`/api/emergency/events/${b.dataset.ack}/ack`,
+        { method: "POST", body: JSON.stringify({ status: b.dataset.st, by: USER }) });
+      toast(`${b.dataset.ack} → ${r.status}`); vEmergency();
+    } catch (e) { toast("失败：" + e.message, true); }
+  });
+}
+
+async function vAnalysis() {
+  const [fi, dom, mt] = await Promise.all([
+    api("/api/analysis/findings"), api("/api/analysis/domains"), api("/api/analysis/metrics")]);
+  $("#view").innerHTML = `
+  <div class="panel"><h2>分析发现 <small>${fi.count} 条 · 每条带判据</small></h2>
+  <table><thead><tr><th>编号</th><th>等级</th><th>分析域</th><th>结论</th><th>影响</th><th>状态</th></tr></thead><tbody>
+  ${fi.items.map(f => `<tr>
+    <td class="mono">${f.code}</td>
+    <td><span class="tag ${f.level === "高" ? "l1" : (f.level === "中" ? "l2" : "")}">${f.level}</span></td>
+    <td>${esc(f.domain)}</td><td>${esc(f.title)}</td>
+    <td>${f.impact_kwh == null ? "—" : f.impact_kwh + " kWh"}</td>
+    <td>${esc(f.status)}</td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="panel"><h2>分析域与指标 <small>字段角色三分：指标 / 判断依据 / 派生</small></h2>
+  <table><thead><tr><th>分析域</th><th>指标数</th><th>指标字段</th><th>判断依据</th><th>派生</th></tr></thead><tbody>
+  ${dom.map(d => `<tr><td>${esc(d.domain)}</td><td class="mono">${d.metric_count}</td>
+    <td>${d.metric_fields ?? 0}</td><td>${d.context_fields ?? 0}</td><td>${d.derived_fields ?? 0}</td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+
+async function vSettings() {
+  const [st, tf, p] = await Promise.all([
+    api("/api/settings"), api("/api/tariff"), api("/api/constraints")]);
+  const grpName = { ai: "AI 设置", algorithm: "算法设置", notify: "通知与渠道",
+                    privacy: "数据与隐私", system: "系统" };
+  $("#view").innerHTML = `
+  <div class="panel"><h2>硬约束自检 <small>${p.pass ? "全部通过" : "存在问题"}</small></h2>
+  <table><thead><tr><th>约束</th><th>状态</th></tr></thead><tbody>
+  <tr><td>全屋不装摄像头</td><td>${p.camera_disabled ? '<span class="tag ok">通过</span>' : '<span class="tag l1">未通过</span>'}</td></tr>
+  <tr><td>结论必须可解释</td><td>${p.explainable_required ? '<span class="tag ok">通过</span>' : '<span class="tag l1">未通过</span>'}</td></tr>
+  <tr><td>无判据的发现数</td><td class="mono">${p.findings_without_evidence}</td></tr>
+  </tbody></table></div>
+  ${Object.keys(st).map(g => `
+  <div class="panel"><h2>${grpName[g] || g} <small>${st[g].length} 项</small></h2>
+  <table><thead><tr><th>键</th><th>值</th><th>说明</th></tr></thead><tbody>
+  ${st[g].map(x => `<tr><td class="mono">${esc(x.key)}</td><td>${esc(x.value)}</td>
+    <td style="color:var(--mut)">${esc(x.note || "")}</td></tr>`).join("")}
+  </tbody></table></div>`).join("")}
+  <div class="panel"><h2>分时电价</h2>
+  <table><thead><tr><th>时段</th><th>起</th><th>止</th><th>单价</th></tr></thead><tbody>
+  ${tf.map(t => `<tr><td>${esc(t.period_name)}</td><td class="mono">${t.start_hour}:00</td>
+    <td class="mono">${t.end_hour}:00</td><td class="mono">¥${t.price_yuan}</td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+
+let SPEC = null;
+async function vApi() {
+  if (!SPEC) {
+    const r = await fetch(API + "/openapi.json");
+    SPEC = await r.json();
+  }
+  const paths = Object.keys(SPEC.paths).sort();
+  if (!document.querySelector(".api-list div")) {
+    $("#api-list").innerHTML = paths.filter(p => !p.startsWith("/docs") && p !== "/openapi.json")
+      .map(p => {
+        const m = Object.keys(SPEC.paths[p])[0];
+        return `<div data-p="${p}" data-m="${m}"><span class="m ${m}">${m.toUpperCase()}</span>${p}</div>`;
+      }).join("");
+    document.querySelectorAll(".api-list div").forEach(d => d.onclick = () => {
+      document.querySelectorAll(".api-list div").forEach(x => x.classList.remove("on"));
+      d.classList.add("on"); callApi(d.dataset.m, d.dataset.p);
+    });
+  }
+}
+
+async function callApi(method, path) {
+  const out = $("#api-out");
+  let p = path;
+  if (p.includes("{device_id}")) p = p.replace("{device_id}", "1");
+  if (p.includes("{pet_id}")) p = p.replace("{pet_id}", (await api("/api/pets"))[0].id);
+  if (p.includes("{code}")) {
+    const c = p.startsWith("/api/emergency") ? (await api("/api/emergency/events")).items[0].code
+                                            : (await api("/api/analysis/findings")).items[0].code;
+    p = p.replace("{code}", c);
+  }
+  if (p.includes("{rule_id}")) p = p.replace("{rule_id}", (await api("/api/automations"))[0].id);
+  if (p.includes("{member_id}")) p = p.replace("{member_id}", (await api("/api/members"))[0].id);
+  p = p.replace("{grp}", "algorithm").replace("{key}", "anomaly_k");
+
+  out.textContent = `→ ${method.toUpperCase()} ${p}\n\n请求中…`;
+  try {
+    const opt = { method: method.toUpperCase() };
+    if (method !== "get") opt.body = JSON.stringify({ status: "已确认", action: "稍后", value: "3", tone_preset: "owner" });
+    const r = await api(p, opt);
+    out.textContent = `→ ${method.toUpperCase()} ${p}\n\n` + JSON.stringify(r, null, 2);
+  } catch (e) {
+    out.textContent = `→ ${method.toUpperCase()} ${p}\n\n✗ ${e.message}`;
+  }
+}
+
+/* ---------------- 路由 ---------------- */
+const VIEWS = { overview: vOverview, devices: vDevices, emergency: vEmergency,
+                analysis: vAnalysis, settings: vSettings, api: vApi };
+
+async function go(v) {
+  document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.v === v));
+  $("#title").textContent = TITLES[v];
+  if (v === "api") {
+    $("#view").innerHTML = `<div class="grid2">
+      <div class="api-list" id="api-list"></div>
+      <pre id="api-out">点左侧任一接口 → 直接调用真实后端并显示返回</pre></div>`;
+    await vApi(); return;
+  }
+  try { await VIEWS[v](); }
+  catch (e) {
+    $("#view").innerHTML = `<div class="panel"><h2 class="err">加载失败</h2>
+      <p class="hint">${esc(e.message)}<br>请确认后端已启动：<code>run.cmd</code>（${API}）</p></div>`;
+  }
+}
+
+function toast(msg, bad) {
+  const d = document.createElement("div");
+  d.textContent = msg;
+  d.style.cssText = `position:fixed;right:18px;bottom:18px;background:${bad ? "#dc2626" : "#0f172a"};
+    color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;z-index:99`;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2200);
+}
+
+document.querySelectorAll("#nav a").forEach(a => a.onclick = () => go(a.dataset.v));
+$("#btnLogin").onclick = async () => {
+  const u = $("#u").value.trim(), p = $("#p").value;
+  if (!u || !p) return toast("请输入账号密码", true);
+  try {
+    const r = await api("/api/auth/login", { method: "POST",
+      body: JSON.stringify({ username: u, password: p }) });
+    TOKEN = r.token; USER = r.user.display_name + "/" + r.user.role;
+    localStorage.setItem("lb_token", TOKEN); localStorage.setItem("lb_user", USER);
+    setWho(); toast("登录成功");
+    if (r.must_change_password) setTimeout(() => toast("首次登录，正式使用前需改密", true), 900);
+    go(document.querySelector("#nav a.on").dataset.v);
+  } catch (e) { toast("登录失败：" + e.message, true); }
+};
+$("#p").addEventListener("keydown", e => { if (e.key === "Enter") $("#btnLogin").click(); });
+
+(async () => {
+  setWho();
+  try {
+    const h = await api("/healthz");
+    $("#p-db").textContent = "数据库 " + (h.db === "up" ? "正常" : "异常");
+    $("#p-db").className = "pill " + (h.db === "up" ? "ok" : "err");
+    $("#p-ver").textContent = "版本 " + h.version;
+  } catch (e) {
+    $("#p-db").textContent = "后端未连接"; $("#p-db").className = "pill err";
+  }
+  go("overview");
+})();
+</script>
+</body></html>
