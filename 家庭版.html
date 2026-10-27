@@ -281,7 +281,7 @@ footer a:hover{color:var(--ink);border-bottom-style:solid}
   <div class="links">
     <a href="http://127.0.0.1:8100/docs" target="_blank">接口文档</a>
   </div>
-  <div>数据 <span class="state ok">内置快照</span> &nbsp; 生成于 2026-10-27</div>
+  <div>数据源 <span class="state" id="svc">连接中…</span></div>
   <div style="margin-top:6px">约定：全屋不装摄像头 · 判定用可解释算法 · 每条结论都能回到原始记录核对。</div>
 </footer>
 
@@ -330,11 +330,36 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 const DEMO = window.__DEMO__ || {};
-const DEMO_MODE = true;
-/* 演示模式：不发网络请求，直接返回烤进页面的数据；写操作一律拒绝 */
+/* 数据源优先级：① 隧道（云端页面用）② 本机 8100（本地打开时用）③ 内置快照（两者都不通时） */
+const LIVE_BASES = ["https://depth-soil-acrobat-payment.trycloudflare.com", "http://127.0.0.1:8100"];
+let LIVE_BASE = null, DATA_SRC = "内置快照";
+
+async function _probe() {
+  if (LIVE_BASE !== null) return LIVE_BASE;
+  for (const b of LIVE_BASES) {
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 4500);
+      const r = await fetch(b + "/healthz", { cache: "no-store", signal: ctl.signal });
+      clearTimeout(t);
+      if (r.ok) { LIVE_BASE = b; DATA_SRC = "实时"; return b; }
+    } catch (e) { /* 换下一个 */ }
+  }
+  LIVE_BASE = "";
+  return "";
+}
+
 async function api(path, opt) {
   opt = opt || {};
   if (opt.method && opt.method !== "GET") throw new Error("演示环境不保存改动");
+  const base = await _probe();
+  if (base) {
+    try {
+      const r = await fetch(base + path, { headers: { "Content-Type": "application/json" },
+        cache: "no-store" });
+      if (r.ok) return await r.json();
+    } catch (e) { /* 隧道掉线 → 落回快照 */ }
+  }
   const key = path.split("?")[0];
   if (!(key in DEMO)) throw new Error("演示数据缺少 " + key);
   return JSON.parse(JSON.stringify(DEMO[key]));
@@ -408,7 +433,7 @@ async function load() {
       api("/api/pets"), api("/api/automations"), api("/api/members"), api("/api/profile")]);
     em = arr[0]; fi = arr[1]; su = arr[2]; fl = arr[3]; ro = arr[4];
     to = arr[5]; pets = arr[6]; autos = arr[7]; mems = arr[8]; prof = arr[9];
-    if ($("#svc")) { $("#svc").textContent = "内置快照"; $("#svc").className = "state ok"; }
+    if ($("#svc")) { $("#svc").textContent = (typeof DATA_SRC === "string" && DATA_SRC === "实时") ? "实时 · 本机数据库" : "内置快照"; $("#svc").className = "state ok"; }
     
   } catch (e) {
     $("#greet").innerHTML = "<b>连不上家里的设备服务。</b>请确认后端已启动（run.cmd），然后刷新页面。";
