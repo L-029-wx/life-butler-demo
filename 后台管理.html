@@ -65,7 +65,16 @@ pre{margin:0;background:#0f172a;color:#cbd5e1;border-radius:9px;padding:12px 14p
  font-size:11.5px;line-height:1.6;overflow:auto;max-height:520px}
 .hint{font-size:12px;color:var(--mut);margin:6px 0 0}
 .err{color:var(--err)}
-</style></head><body><div style="background:#1a2130;color:#e8eef6;font-size:13px;padding:8px 16px;text-align:center">管理台 · 线上演示版（实时数据来自本机数据库，只读）</div>
+</style>
+<style>
+.plan-wrap{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.plan-svg{flex:1 1 460px;min-width:320px}
+.plan-side{flex:0 0 190px;font-size:13px;color:#64748b;line-height:1.9}
+.plan-side b{color:#334155}
+.lg{display:inline-flex;align-items:center;gap:5px;margin-right:14px;font-size:12.5px;color:#64748b}
+.lg i{width:9px;height:9px;border-radius:50%;display:inline-block}
+</style>
+</head><body><div style="background:#1a2130;color:#e8eef6;font-size:13px;padding:8px 16px;text-align:center">管理台 · 线上演示版（实时数据来自本机数据库，只读）</div>
 <div class="app">
 <aside>
   <div class="brand"><div class="logo">管</div><div><b>电子生活管家</b><small>后台管理</small></div></div>
@@ -116,7 +125,80 @@ function setWho() {
   $("#who").style.color = TOKEN ? "var(--ok)" : "var(--mut)";
 }
 
+async function fillPlan() {
+  const box = document.getElementById("planBox");
+  if (!box) return;
+  let devs = [];
+  try { devs = await api("/api/devices"); } catch (e) { devs = []; }
+  box.innerHTML = '<div class="plan-svg">' + planSVG(devs) + '</div>' +
+    '<div class="plan-side">' + planLegend(devs) +
+    '<p style="margin:10px 0 0">点位按台账坐标落位，颜色取自设备实时状态（<b>在线 / 离线 / 低电量</b>）。</p>' +
+    '<p style="margin:6px 0 0">全屋 <b>不装摄像头</b>，人体存在一律毫米波雷达。</p></div>';
+}
+
 /* ---------------- 视图 ---------------- */
+/* ================= 2D 建筑平面图（户型平面图 / architectural floor plan） ================= */
+/* 图名依据 GB/T 50104-2010《建筑制图标准》4.1：在门窗洞口处水平剖切俯视 */
+const PLAN = {"rooms":[["北阳台",180.0,40.0,369.0,124.0,"#eefaf8"],["厨房",40.0,124.0,180.0,355.0,"#fef7e6"],["次卧",180.0,124.0,369.0,355.0,"#f8f2fd"],["卫生间",369.0,124.0,495.0,292.0,"#e9f7fb"],["过道",369.0,292.0,495.0,355.0,"#f1f5f9"],["主卧",495.0,124.0,747.0,355.0,"#eefaf1"],["客厅",40.0,355.0,495.0,670.0,"#eef1fe"],["三卧",495.0,355.0,747.0,670.0,"#fdf2f8"],["南阳台",40.0,670.0,495.0,796.0,"#eefaf8"]],"dev":[[1,"北阳台",274.5,78.5,"阳台门磁"],[2,"厨房",75.0,173.0,"冰箱"],[3,"厨房",145.0,173.0,"厨房小电"],[4,"厨房",75.0,278.0,"人体存在"],[5,"厨房",145.0,278.0,"烟雾水浸"],[6,"次卧",222.0,180.0,"人体存在"],[7,"次卧",327.0,180.0,"红外转发"],[8,"次卧",222.0,299.0,"空调"],[9,"卫生间",400.5,173.0,"人体存在"],[10,"卫生间",463.5,173.0,"红外转发"],[11,"主卧",544.0,180.0,"人体存在"],[12,"主卧",698.0,180.0,"红外转发"],[13,"主卧",544.0,299.0,"空调"],[14,"主卧",698.0,299.0,"环境"],[15,"客厅",96.0,418.0,"网关"],[16,"客厅",201.0,418.0,"人体存在"],[17,"客厅",306.0,418.0,"环境"],[18,"客厅",411.0,418.0,"电视路由"],[19,"客厅",96.0,558.0,"红外转发"],[20,"客厅",201.0,558.0,"空调"],[21,"客厅",306.0,558.0,"回路CT"],[22,"客厅",411.0,558.0,"入户门磁"],[23,"三卧",551.0,425.0,"人体存在"],[24,"三卧",691.0,425.0,"红外转发"],[25,"三卧",551.0,579.0,"空调"],[26,"南阳台",124.0,726.0,"洗衣机"],[27,"南阳台",257.0,726.0,"红外转发"],[28,"南阳台",390.0,726.0,"宠物投喂"]],"outline":[[180.0,40.0],[369.0,40.0],[369.0,124.0],[747.0,124.0],[747.0,670.0],[495.0,670.0],[495.0,796.0],[40.0,796.0],[40.0,124.0],[180.0,124.0]],"box":[28.0,28.0,759.0,808.0]};
+
+function planSVG(devs) {
+  const [x0, y0, x1, y1] = PLAN.box;
+  const byNo = {};
+  (devs || []).forEach(function (d) { byNo[d.no] = d; });
+
+  let s = '<svg viewBox="' + [x0, y0, x1 - x0, y1 - y0].join(' ') + '" ' +
+          'style="width:100%;height:auto;max-height:460px;display:block">';
+
+  /* 外墙轮廓 */
+  s += '<polygon points="' + PLAN.outline.map(function (p) { return p[0] + ',' + p[1]; }).join(' ') +
+       '" fill="#f8fafc" stroke="#334155" stroke-width="5" stroke-linejoin="round"/>';
+
+  /* 房间 */
+  PLAN.rooms.forEach(function (r) {
+    const [name, rx, ry, rx2, ry2, fill] = r;
+    s += '<rect x="' + rx + '" y="' + ry + '" width="' + (rx2 - rx) + '" height="' + (ry2 - ry) +
+         '" fill="' + fill + '" stroke="#cbd5e1" stroke-width="2"/>';
+    s += '<text x="' + ((rx + rx2) / 2) + '" y="' + ((ry + ry2) / 2 + 5) +
+         '" text-anchor="middle" font-size="15" fill="#64748b" font-family="inherit">' + name + '</text>';
+  });
+
+  /* 设备点位：绿=在线 灰=离线 橙=低电量 */
+  PLAN.dev.forEach(function (v) {
+    const [no, room, dx, dy, label] = v;
+    const d = byNo[no];
+    let color = '#94a3b8', ring = 'none';
+    if (d) {
+      if (d.battery_pct !== null && d.battery_pct !== undefined && d.battery_pct < 30) {
+        color = '#d97706'; ring = '#fed7aa';
+      } else if (d.online) {
+        color = '#059669'; ring = '#a7f3d0';
+      }
+    } else {
+      color = '#cbd5e1';
+    }
+    const tip = label + (d ? (' ｜ ' + (d.online ? '在线' : '离线') +
+                (d.battery_pct !== null && d.battery_pct !== undefined ? (' · 电量 ' + d.battery_pct + '%') : '')) : '');
+    s += '<g class="dot"><title>' + tip + '</title>';
+    s += '<circle cx="' + dx + '" cy="' + dy + '" r="9" fill="' + ring + '"/>';
+    s += '<circle cx="' + dx + '" cy="' + dy + '" r="5" fill="' + color + '" stroke="#fff" stroke-width="1.5"/>';
+    s += '</g>';
+  });
+
+  s += '</svg>';
+  return s;
+}
+
+/* 图例 */
+function planLegend(devs) {
+  const lowOf = function (d) { return d.battery_pct !== null && d.battery_pct !== undefined && d.battery_pct < 30; };
+  const on = (devs || []).filter(function (d) { return d.online && !lowOf(d); }).length;
+  const off = (devs || []).filter(function (d) { return !d.online; }).length;
+  const low = (devs || []).filter(lowOf).length;
+  return '<span class="lg"><i style="background:#059669"></i>在线 ' + on + '</span>' +
+         '<span class="lg"><i style="background:#94a3b8"></i>离线 ' + off + '</span>' +
+         '<span class="lg"><i style="background:#d97706"></i>低电量 ' + low + '</span>';
+}
+
 const TITLES = { overview: "概览", devices: "设备管理", emergency: "应急处置",
                  analysis: "分析建议", settings: "基础设置", api: "接口调试" };
 
@@ -145,8 +227,11 @@ async function vOverview() {
       return `<tr><td>${k}</td><td class="mono">${v.toFixed(2)}</td><td>${(v/tot*100).toFixed(1)}%</td></tr>`;
     }).join("")}
     </tbody></table></div>
-  <div class="panel"><h2>数据链路 <small>Hive 明细 → MySQL 服务层 → API</small></h2>
+    <div class="panel"><h2>户型平面图 <small>建筑平面图 · GB/T 50104-2010 · 门窗洞口处水平剖切俯视</small></h2>
+    <div id="planBox" class="plan-wrap"><div class="hint">读取中…</div></div></div>
+<div class="panel"><h2>数据链路 <small>Hive 明细 → MySQL 服务层 → API</small></h2>
     <p class="hint">MySQL 29 张表 · 接口 50 个 · 判定与表达分离 · 结论可回溯</p></div>`;
+  fillPlan();
 }
 
 async function vDevices() {
