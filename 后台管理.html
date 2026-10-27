@@ -676,6 +676,11 @@ async function vAnalysis() {
         };
         /* ---------- 点开一条建议 → 看它自己的证据图 + 分析 ---------- */
         let FIND_CACHE = {};
+
+        /* 把 **加粗** 标记转成 <b>，其余照常转义 */
+        function mdBold(str) {
+            return esc(String(str || "")).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+        }
         let FD_CHART = null;
 
         async function showFinding(code, tr) {
@@ -702,7 +707,7 @@ async function vAnalysis() {
                 '<div class="fd-meta">' +
                 '<p><b>发现结论</b>　' + esc(f.title || "—") + '</p>' +
                 '<p><b>判据原文</b>　' + esc(f.evidence || "—") + '</p>' +
-                '<p><b>建议动作</b>　' + esc(f.action_text || "—") + '</p>' +
+                '<p><b>建议（按本图数据生成）</b>　' + mdBold(d.advice || f.action_text || "—") + '</p>' +
                 (f.impact_kwh != null ? '<p><b>量化影响</b>　' + f.impact_kwh + ' kWh' +
                     (f.impact_yuan != null ? ' ≈ ¥' + f.impact_yuan : '') + '</p>' : '') +
                 '</div></div>';
@@ -761,12 +766,6 @@ async function vAnalysis() {
             }
             FD_CHART.setOption(opt);
         }
-
-        FIND_CACHE = {};
-        fi.items.forEach(function (f) { FIND_CACHE[f.code] = f; });
-        document.querySelectorAll("#view tr.frow").forEach(function (tr) {
-            tr.onclick = function () { showFinding(tr.dataset.f, tr); };
-        });
 
         Object.keys(CAP).forEach(function (id) {
             const el = document.getElementById(id);
