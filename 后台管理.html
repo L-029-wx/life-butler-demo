@@ -73,6 +73,16 @@ pre{margin:0;background:#0f172a;color:#cbd5e1;border-radius:9px;padding:12px 14p
 .cap{margin:10px 0 2px;padding:9px 13px;font-size:12.5px;line-height:1.85;color:#5b6673;
   background:#f8fafc;border-left:3px solid #cfe0f7;border-radius:0 7px 7px 0}
 .cap b{color:#1e3a8a;font-weight:600}
+
+.frow{cursor:pointer}
+.frow:hover td{background:#f1f5fb}
+.frow.on td{background:#e8f0fe}
+.fdetail-in{margin-top:12px;padding:16px 18px;background:#fff;border:1px solid #dbe4f0;border-radius:10px}
+.fdetail-in h3{margin:0 0 10px;font-size:15px;color:#1e3a8a}
+.fdetail-in h3 .hint{font-weight:400;font-size:12px}
+.fd-meta{margin-top:10px;border-top:1px dashed #e2e8f0;padding-top:10px}
+.fd-meta p{margin:5px 0;font-size:12.5px;line-height:1.75;color:#5b6673}
+.fd-meta b{color:#334155}
 </style>
 <style>
 .plan-wrap{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
@@ -391,13 +401,15 @@ async function vAnalysis() {
 
   <div class="panel"><h2>分析发现 <small>${fi.count} 条 · 每条带判据</small></h2>
   <table><thead><tr><th>编号</th><th>等级</th><th>分析域</th><th>结论</th><th>影响</th><th>状态</th></tr></thead><tbody>
-  ${fi.items.map(f => `<tr>
+  ${fi.items.map(f => `<tr class="frow" data-f="${f.code}" title="点开看这条建议的证据图">
     <td class="mono">${f.code}</td>
     <td><span class="tag ${f.level === "高" ? "l1" : (f.level === "中" ? "l2" : "")}">${f.level}</span></td>
     <td>${esc(f.domain)}</td><td>${esc(f.title)}</td>
     <td>${f.impact_kwh == null ? "—" : f.impact_kwh + " kWh"}</td>
     <td>${esc(f.status)}</td></tr>`).join("")}
-  </tbody></table></div>
+  </tbody></table>
+  <div id="fdetail"><p class="hint" style="padding:6px 0">↑ 点任意一行，展开它自己的数据图与判据</p></div>
+  </div>
 
   <div class="panel"><h2>分析域与指标 <small>字段角色三分：指标 / 判断依据 / 派生</small></h2>
   <table><thead><tr><th>分析域</th><th>指标数</th><th>指标字段</th><th>判断依据</th><th>派生</th></tr></thead><tbody>
@@ -454,12 +466,24 @@ async function vAnalysis() {
     xAxis: Object.assign({ type: "category", data: dayNames,
       axisLabel: { color: "#64748b", fontSize: 10, interval: 0 } }, BASE_AXIS),
     yAxis: Object.assign({ type: "value", name: "kWh", nameTextStyle: { color: "#94a3b8" } }, BASE_AXIS),
+    yAxis: [{ type: "value", name: "kWh", nameTextStyle: { color: "#94a3b8" },
+              axisLabel: { color: "#64748b", fontSize: 11 }, splitLine: { lineStyle: { color: "#eef2f7" } } },
+            { type: "value", name: "谷段占比%", max: 100, min: 0, nameTextStyle: { color: "#0f766e" },
+              axisLabel: { color: "#0f766e", fontSize: 10, formatter: "{value}%" }, splitLine: { show: false } }],
     series: ["peak", "flat", "valley"].map(function (k) {
       const nm = { peak: "峰", flat: "平", valley: "谷" }[k];
       return { name: nm, type: "bar", stack: "t", barWidth: "58%",
                itemStyle: { color: TARIFF_COLOR[k], borderRadius: k === "valley" ? [3, 3, 0, 0] : 0 },
                data: days.map(function (d) { return +(byDay[d][k]).toFixed(2); }) };
-    })
+    }).concat([{
+      name: "谷段占比", type: "line", yAxisIndex: 1, smooth: true, symbolSize: 7,
+      lineStyle: { width: 2.4, color: "#0f766e" }, itemStyle: { color: "#0f766e" },
+      label: { show: true, position: "top", fontSize: 10, color: "#0f766e", formatter: "{c}%" },
+      data: days.map(function (d) {
+        const t = byDay[d].peak + byDay[d].flat + byDay[d].valley;
+        return +(byDay[d].valley / t * 100).toFixed(1);
+      })
+    }])
   });
 
   /* ---------- ③ 小时 × 星期 热力图 ---------- */
@@ -481,7 +505,7 @@ async function vAnalysis() {
   /* ---------- ④ FLQI 雷达 ---------- */
   mkChart("cFlqi", {
     tooltip: {},
-    radar: { indicator: fl.items.map(function (i) { return { name: i.name, max: 100 }; }),
+    radar: { indicator: fl.items.map(function (i) { return { name: i.name + " " + i.score, max: 100 }; }),
       radius: "66%", center: ["50%", "54%"],
       axisName: { color: "#475569", fontSize: 12 },
       splitLine: { lineStyle: { color: "#e2e8f0" } },
@@ -605,11 +629,14 @@ async function vAnalysis() {
                 const mi = dom.reduce(function (a, b) { return a + (b.metric_fields || 0); }, 0);
                 const co = dom.reduce(function (a, b) { return a + (b.context_fields || 0); }, 0);
                 const de = dom.reduce(function (a, b) { return a + (b.derived_fields || 0); }, 0);
-                return '蓝 = <b>指标字段</b>（进分子分母，如用电量、峰谷比），橙 = <b>判断依据字段</b>' +
-                    '（气温、电价、日程——<b>绝不进计算</b>），绿 = 派生字段。全库共 ' + mi + ' 个指标字段、' +
-                    co + ' 个判断依据、' + de + ' 个派生。' +
-                    '这张图是「字段二分」纪律的可视化：<b>橙色那截永远是独立的一块，不和蓝色叠加</b>。' +
-                    '如果哪天有人把一个判断依据塞进分母，这里就会多出一截橙——图本身就是自检。';
+                return '这张图回答一个问题：<b>我们统计的 ' + (mi + co + de) + ' 个字段里，有多少能直接拿来算，' +
+                    '有多少只是解释用的背景信息？</b>' +
+                    '蓝色 ' + mi + ' 个是<b>能算的</b>（用电量、峰谷比这类），进公式的分子分母；' +
+                    '橙色 ' + co + ' 个是<b>只解释、不参与算的</b>（今天几度、电价多少、谁在家）——' +
+                    '比如"今天冷所以用电多"，气温只用来说明原因，<b>不能拿去和用电量做除法</b>；' +
+                    '绿色 ' + de + ' 个是由前面两类算出来的。' +
+                    '这张图摆在这里的作用是<b>自证</b>：橙色和蓝色永远分开站，' +
+                    '一旦有人把气温塞进分母，图上就会露馅。';
             },
             cBase: function () {
                 const n = bl.length;
@@ -619,6 +646,100 @@ async function vAnalysis() {
                     '为什么不用平均值 ± 标准差：一次异常就会把均值拉走，而中位数 + MAD 不会被单点带偏。';
             }
         };
+        /* ---------- 点开一条建议 → 看它自己的证据图 + 分析 ---------- */
+        let FIND_CACHE = {};
+        let FD_CHART = null;
+
+        async function showFinding(code, tr) {
+            const box = document.getElementById("fdetail");
+            if (!box) return;
+            document.querySelectorAll("#view tr.frow").forEach(function (r) { r.classList.remove("on"); });
+            if (tr) tr.classList.add("on");
+            box.innerHTML = '<div class="hint" style="padding:14px">正在取这条建议的证据数据…</div>';
+
+            let d;
+            try {
+                d = await api("/api/analysis/findings/" + code + "/data");
+            } catch (e) {
+                box.innerHTML = '<div class="hint" style="padding:14px">取数失败：' + esc(e.message) + '</div>';
+                return;
+            }
+
+            const f = FIND_CACHE[code] || {};
+            box.innerHTML =
+                '<div class="fdetail-in">' +
+                '<h3>' + esc(d.title) + ' <span class="hint">' + esc(code) + ' · 证据数据</span></h3>' +
+                '<div id="fdChart" style="height:250px"></div>' +
+                '<p class="cap">' + esc(d.note) + '</p>' +
+                '<div class="fd-meta">' +
+                '<p><b>发现结论</b>　' + esc(f.title || "—") + '</p>' +
+                '<p><b>判据原文</b>　' + esc(f.evidence || "—") + '</p>' +
+                '<p><b>建议动作</b>　' + esc(f.action_text || "—") + '</p>' +
+                (f.impact_kwh != null ? '<p><b>量化影响</b>　' + f.impact_kwh + ' kWh' +
+                    (f.impact_yuan != null ? ' ≈ ¥' + f.impact_yuan : '') + '</p>' : '') +
+                '</div></div>';
+
+            const el = document.getElementById("fdChart");
+            if (!el || !window.echarts || d.kind === "text" || !(d.y || d.series)) return;
+            if (FD_CHART) { FD_CHART.dispose(); }
+            FD_CHART = echarts.init(el);
+
+            const hl = d.highlight || [];
+            const hlSet = {};
+            hl.forEach(function (i) { hlSet[i] = 1; });
+            const opt = { grid: { left: 46, right: 18, top: 22, bottom: 46 },
+                          tooltip: { trigger: d.kind === "pie" ? "item" : "axis" } };
+
+            if (d.kind === "pie") {
+                opt.tooltip.formatter = "{b}: {c} kWh ({d}%)";
+                opt.legend = { bottom: 0, textStyle: { fontSize: 11, color: "#64748b" } };
+                opt.series = [{ type: "pie", radius: ["42%", "66%"], center: ["50%", "46%"],
+                                label: { fontSize: 11, formatter: "{b}\n{c} kWh" },
+                                data: d.x.map(function (n, i) {
+                                    return { name: n, value: d.y[i] };
+                                }),
+                                itemStyle: { borderColor: "#fff", borderWidth: 2 },
+                                color: ["#c0392b", "#b7791f", "#2f7a58"] }];
+            } else if (d.kind === "stacked") {
+                opt.legend = { top: 0, textStyle: { fontSize: 11, color: "#64748b" } };
+                opt.xAxis = Object.assign({ type: "category", data: d.x }, BASE_AXIS);
+                opt.yAxis = Object.assign({ type: "value", name: d.unit }, BASE_AXIS);
+                opt.series = d.series.map(function (s, i) {
+                    return { name: s.name, type: "bar", stack: "f", barWidth: "56%",
+                             itemStyle: { color: i === 0 ? "#2563eb" : "#2f7a58" }, data: s.data };
+                });
+            } else {
+                opt.xAxis = Object.assign({ type: "category", data: d.x,
+                    axisLabel: { color: "#64748b", fontSize: 10, interval: 0,
+                                 rotate: d.x.length > 10 ? 40 : 0 } }, BASE_AXIS);
+                opt.yAxis = Object.assign({ type: "value", name: d.unit,
+                    nameTextStyle: { color: "#94a3b8" } }, BASE_AXIS);
+                if (d.kind === "line") {
+                    opt.series = [{ type: "line", smooth: false, symbol: "circle", symbolSize: 6,
+                        data: d.y.map(function (v, i) {
+                            return { value: v, itemStyle: { color: hlSet[i] ? "#c0392b" : "#2563eb" } };
+                        }),
+                        lineStyle: { width: 2.2, color: "#2563eb" },
+                        markLine: d.ref ? { silent: true, symbol: "none",
+                            lineStyle: { type: "dashed", color: "#b7791f" },
+                            label: { formatter: "基线 " + d.ref, fontSize: 10, color: "#b7791f" },
+                            data: [{ yAxis: d.ref }] } : undefined }];
+                } else {
+                    opt.series = [{ type: "bar", barWidth: "56%",
+                        data: d.y.map(function (v, i) {
+                            return { value: v, itemStyle: { color: hlSet[i] ? "#c0392b" : "#2563eb" } };
+                        }) }];
+                }
+            }
+            FD_CHART.setOption(opt);
+        }
+
+        FIND_CACHE = {};
+        fi.items.forEach(function (f) { FIND_CACHE[f.code] = f; });
+        document.querySelectorAll("#view tr.frow").forEach(function (tr) {
+            tr.onclick = function () { showFinding(tr.dataset.f, tr); };
+        });
+
         Object.keys(CAP).forEach(function (id) {
             const el = document.getElementById(id);
             if (el) { el.insertAdjacentHTML("afterend", '<p class="cap">' + CAP[id]() + '</p>'); }
