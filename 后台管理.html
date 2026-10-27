@@ -69,6 +69,10 @@ pre{margin:0;background:#0f172a;color:#cbd5e1;border-radius:9px;padding:12px 14p
 .charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:14px}
 .charts .panel{margin:0}
 .chart{width:100%}
+
+.cap{margin:10px 0 2px;padding:9px 13px;font-size:12.5px;line-height:1.85;color:#5b6673;
+  background:#f8fafc;border-left:3px solid #cfe0f7;border-radius:0 7px 7px 0}
+.cap b{color:#1e3a8a;font-weight:600}
 </style>
 <style>
 .plan-wrap{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
@@ -295,7 +299,6 @@ async function vEmergency() {
   });
 }
 
-/* ================= 分析建议视图（图表版） ================= */
 /* 电价时段：谷 0-8 · 平 8-10 / 12-14 / 19-24 · 峰 10-12 / 14-19（与后端 dim_context 一致） */
 const TARIFF_BANDS = [[0, 8, "valley", "谷"], [8, 10, "flat", "平"], [10, 12, "peak", "峰"],
                       [12, 14, "flat", "平"], [14, 19, "peak", "峰"], [19, 24, "flat", "平"]];
@@ -549,6 +552,77 @@ async function vAnalysis() {
       }
     }]
   });
+
+        /* ---------- 每张图下方的小字讲解 ---------- */
+        const CAP = {
+            cLoad: function () {
+                const pk = avgHour.indexOf(Math.max.apply(null, avgHour));
+                const pv = Math.max.apply(null, avgHour).toFixed(2);
+                const lo = avgHour.indexOf(Math.min.apply(null, avgHour));
+                const lv = Math.min.apply(null, avgHour).toFixed(2);
+                const peakBand = tariffOf(pk)[3];
+                return '曲线是 <b>7 天同一时刻的平均值</b>，不是某一天。全天高峰在 <b>' + pk +
+                    ' 时（' + pv + ' kWh）</b>，最低在 <b>' + lo + ' 时（' + lv + ' kWh）</b>——差 ' +
+                    (pv / lv).toFixed(1) + ' 倍。底色是电价时段：傍晚高峰正好落在<b>' + peakBand +
+                    '段</b>，这就是 F3 建议把可延后负载挪到夜里的依据。';
+            },
+            cTariff: function () {
+                const tot = function (d) { return byDay[d].peak + byDay[d].flat + byDay[d].valley; };
+                const mx = days.reduce(function (a, b) { return tot(b) > tot(a) ? b : a; });
+                let sumValley = 0, sumAll = 0;
+                days.forEach(function (d) { sumValley += byDay[d].valley; sumAll += tot(d); });
+                return '每根柱是一天的总量，从下到上依次是<b>峰 / 平 / 谷</b>。最高是 <b>' + mx.slice(5) +
+                    '（' + tot(mx).toFixed(1) + ' kWh）</b>。谷段占全周 <b>' +
+                    (sumValley / sumAll * 100).toFixed(1) + '%</b>，始终是最大一块——说明夜间空调是主要负荷。' +
+                    '堆叠顺序不能反：谷在底部，一眼能看出"便宜电占比有多高"。';
+            },
+            cHeat: function () {
+                const deep = heat.reduce(function (a, b) { return b[2] > a[2] ? b : a; });
+                return '横轴一天 24 小时，纵轴 7 天。<b>深色集中在傍晚到前半夜</b>，且每天位置一致——' +
+                    '说明这是稳定作息，不是偶发行为。<b>最深的一格是 ' + dayNames[deep[1]] + ' ' + deep[0] +
+                    ' 时（' + deep[2] + ' kWh）</b>，和 F1「空调空转」的时间段对得上。' +
+                    '热力图的价值在于<b>看模式</b>：单日曲线只能说明某天，矩阵才能说明"天天如此"。';
+            },
+            cFlqi: function () {
+                let mx = fl.items[0], mn = fl.items[0];
+                fl.items.forEach(function (i) { if (i.score > mx.score) mx = i; if (i.score < mn.score) mn = i; });
+                return '六项子分<b>等权平均</b>得 ' + fl.total + '。最高是 <b>' + mx.name + '（' + mx.score +
+                    '）</b>，最低是 <b>' + mn.name + '（' + mn.score + '）</b>。' +
+                    '形状说明"总体不差，但短板明确"——答辩时可以直接指出短板项对应的具体发现，' +
+                    '把综合分和单点结论连起来。注意口径：这是<b>六项平均的工程参考值</b>，不是体检或评级。';
+            },
+            cTop: function () {
+                const first = top[top.length - 1];
+                const all = (su.top_devices || []).filter(function (d) { return d.short_name !== "回路CT"; })
+                    .reduce(function (a, b) { return a + b.kwh; }, 0);
+                return '第一名是 <b>' + first.short_name + '（' + first.room_name.split(" ")[0] + '）' +
+                    first.kwh + ' kWh</b>，占这 8 台合计的 <b>' +
+                    (first.kwh / all * 100).toFixed(0) + '%</b>。' +
+                    '这里<b>刻意剔除了「回路CT」这一行</b>——它是全屋总量，不是某台设备，混进来会把排行读错。' +
+                    '排行只回答"谁最费电"，不回答"该不该省"：空调费电是刚需，空转才该省。';
+            },
+            cDom: function () {
+                const mi = dom.reduce(function (a, b) { return a + (b.metric_fields || 0); }, 0);
+                const co = dom.reduce(function (a, b) { return a + (b.context_fields || 0); }, 0);
+                const de = dom.reduce(function (a, b) { return a + (b.derived_fields || 0); }, 0);
+                return '蓝 = <b>指标字段</b>（进分子分母，如用电量、峰谷比），橙 = <b>判断依据字段</b>' +
+                    '（气温、电价、日程——<b>绝不进计算</b>），绿 = 派生字段。全库共 ' + mi + ' 个指标字段、' +
+                    co + ' 个判断依据、' + de + ' 个派生。' +
+                    '这张图是「字段二分」纪律的可视化：<b>橙色那截永远是独立的一块，不和蓝色叠加</b>。' +
+                    '如果哪天有人把一个判断依据塞进分母，这里就会多出一截橙——图本身就是自检。';
+            },
+            cBase: function () {
+                const n = bl.length;
+                return '每个点是一个指标的<b>历史中位数</b>，竖线是 <b>±3 倍稳健标准差</b>（由 MAD 折算，' +
+                    '抗离群）。全库共 ' + n + ' 条基线。点在竖线中间 = 正常；<b>一旦越出竖线就是偏离</b>，' +
+                    'F2 的冰箱压缩机时长就是这么判出来的。' +
+                    '为什么不用平均值 ± 标准差：一次异常就会把均值拉走，而中位数 + MAD 不会被单点带偏。';
+            }
+        };
+        Object.keys(CAP).forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) { el.insertAdjacentHTML("afterend", '<p class="cap">' + CAP[id]() + '</p>'); }
+        });
 
   window.onresize = function () {
     Object.keys(CH).forEach(function (k) { if (CH[k]) CH[k].resize(); });
