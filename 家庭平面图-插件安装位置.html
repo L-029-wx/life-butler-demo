@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>三室一厅平面图 · 插件安装位置标注 | 电子生活管家</title>
+<style>
+:root{--ink:#0f172a;--body:#334155;--mut:#64748b;--line:#e2e8f0;--bg:#f5f7fb;--card:#fff;--accent:#6366f1;--accent2:#8b5cf6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);
+ font:15px/1.65 "Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1420px;margin:0 auto;padding:28px 22px 56px}
+header h1{margin:0 0 6px;font-size:26px;color:var(--ink);letter-spacing:.3px}
+header h1 b{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{margin:0;color:var(--mut);font-size:13.5px}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:112px}
+.kpi b{display:block;font-size:20px;color:var(--ink);line-height:1.25}
+.kpi span{font-size:12px;color:var(--mut)}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:0 0 16px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;
+ padding:5px 12px;font-size:12.5px;color:var(--body);cursor:pointer;font-family:inherit;transition:.16s}
+.chip i{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.chip:hover{border-color:#c7d2fe;transform:translateY(-1px)}
+.chip.on{border-color:var(--c,#6366f1);box-shadow:0 0 0 2px color-mix(in srgb,var(--c,#6366f1) 16%,transparent)}
+.sep{width:1px;height:18px;background:var(--line);margin:0 4px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:18px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.card.plan{padding:10px}
+#plan{display:block;width:100%;height:auto}
+#plan .dev{cursor:pointer}
+#plan.dim .dev{opacity:.16;transition:.18s}
+#plan.dim .dev.hit{opacity:1}
+aside.detail{padding:16px 16px 18px;position:sticky;top:18px}
+aside.detail h3{margin:0 0 4px;font-size:16px;color:var(--ink)}
+aside.detail .hint{font-size:12.5px;color:var(--mut);margin:0 0 12px}
+.d-head{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.d-no{width:30px;height:30px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:0 0 auto}
+.d-title{font-size:15.5px;color:var(--ink);font-weight:600;line-height:1.3}
+.d-title small{display:block;font-weight:400;color:var(--mut);font-size:12px;margin-top:2px}
+.d-row{display:flex;gap:9px;font-size:13px;padding:7px 0;border-top:1px dashed var(--line)}
+.d-row em{font-style:normal;color:var(--mut);flex:0 0 54px}
+.legendbox{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mut)}
+.legendbox div{display:flex;align-items:center;gap:7px;margin:5px 0}
+.badge-demo{width:15px;height:15px;border-radius:50%;display:inline-block;flex:0 0 auto}
+h2.sec{font-size:17px;color:var(--ink);margin:30px 0 12px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f8fafc;color:var(--mut);font-weight:600;font-size:12px;white-space:nowrap}
+tr.grp td{background:#eef2ff;color:#3730a3;font-weight:600;font-size:12.5px;padding:7px 11px}
+tr.grp .cnt{float:right;color:#6366f1;font-weight:400}
+tr[data-no]:hover{background:#fafbff}
+.c-no{width:46px}.c-price{width:74px;white-space:nowrap}.c-tag{width:104px}
+.dot{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;color:#fff;font-size:11px;font-weight:700}
+.c-name{min-width:150px;color:var(--ink);font-weight:500}
+.c-name .sub{font-weight:400;color:var(--mut);font-size:11.5px;margin-top:1px}
+.c-pos{min-width:190px}.c-sig{min-width:230px;color:var(--mut);font-size:12.5px}
+.dom{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px;color:var(--c);
+ background:color-mix(in srgb,var(--c) 11%,#fff);border:1px solid color-mix(in srgb,var(--c) 26%,#fff)}
+.tag{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;margin-right:3px}
+.tag.base{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe}
+.tag.opt{background:#f8fafc;color:#64748b;border:1px solid #e2e8f0}
+.tag.ir{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mut)}
+footer b{color:var(--ink)}
+.note{background:#fff;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:13px}
+.note b{color:var(--ink)}
+.note.ir{border-left-color:#059669}
+.note.src{border-left-color:#0ea5e9}
+.note code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12px}
+@media print{body{background:#fff}.wrap{max-width:none;padding:0}.toolbar,aside.detail{display:none}
+ .grid{grid-template-columns:1fr}.card{box-shadow:none;break-inside:avoid}}
+@media(max-width:1040px){.grid{grid-template-columns:1fr}aside.detail{position:static}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>三室一厅平面图 · <b>插件安装位置标注</b></h1>
+  <p>建筑面积约 90 ㎡（外轮廓 10.1m × 10.8m）· 存量设备不动、只加装小器械 · 标点 = 实际安装位；圈号与下表一一对应</p>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><b>9</b><span>空间</span></div>
+  <div class="kpi"><b>28</b><span>安装点位</span></div>
+  <div class="kpi"><b>6</b><span>红外转发器</span></div>
+  <div class="kpi"><b>21</b><span>基础配置（件）</span></div>
+  <div class="kpi"><b>¥1317.6</b><span>基础配置合计</span></div>
+  <div class="kpi"><b>6+2</b><span>主分析域 6 · 选做与上下文 2</span></div>
+</div>
+
+<div class="toolbar">
+  <span style="font-size:12.5px;color:var(--mut)">按分析域筛选：</span>
+  <button class="chip" data-filter="dom" data-val="基础设施" style="--c:#8b5cf6"><i style="background:#8b5cf6"></i>基础设施</button><button class="chip" data-filter="dom" data-val="能耗与物资" style="--c:#f59e0b"><i style="background:#f59e0b"></i>能耗与物资</button><button class="chip" data-filter="dom" data-val="家务与作息" style="--c:#6366f1"><i style="background:#6366f1"></i>家务与作息</button><button class="chip" data-filter="dom" data-val="设备健康" style="--c:#14b8a6"><i style="background:#14b8a6"></i>设备健康</button><button class="chip" data-filter="dom" data-val="饮食与膳食" style="--c:#f97316"><i style="background:#f97316"></i>饮食与膳食</button><button class="chip" data-filter="dom" data-val="宠物照护" style="--c:#ec4899"><i style="background:#ec4899"></i>宠物照护</button><button class="chip" data-filter="dom" data-val="安全守护" style="--c:#64748b"><i style="background:#64748b"></i>安全守护</button><button class="chip" data-filter="dom" data-val="上下文依据" style="--c:#0ea5e9"><i style="background:#0ea5e9"></i>上下文依据</button>
+  <span class="sep"></span>
+  <button class="chip" data-filter="base" data-val="1">只看基础配置</button>
+  <button class="chip" data-filter="base" data-val="0">只看可选扩展</button>
+  <button class="chip" data-filter="ir" data-val="1">只看红外转发</button>
+  <button class="chip" data-filter="reset">显示全部</button>
+</div>
+
+<div class="grid">
+  <section class="card plan"><svg id="plan" viewBox="0 0 910 880" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+<defs><filter id="sh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#0f172a" flood-opacity="0.18"/></filter></defs>
+<rect x="40.0" y="124.0" width="140.0" height="231.0" fill="#fef7e6"/>
+<rect x="180.0" y="124.0" width="189.0" height="231.0" fill="#f8f2fd"/>
+<rect x="369.0" y="124.0" width="126.0" height="168.0" fill="#e9f7fb"/>
+<rect x="495.0" y="124.0" width="252.0" height="231.0" fill="#eefaf1"/>
+<rect x="40.0" y="355.0" width="455.0" height="315.0" fill="#eef1fe"/>
+<rect x="495.0" y="355.0" width="252.0" height="315.0" fill="#fdf2f8"/>
+<rect x="180.0" y="40.0" width="189.0" height="84.0" fill="#eefaf8"/>
+<rect x="40.0" y="670.0" width="455.0" height="126.0" fill="#eefaf8"/>
+<rect x="369.0" y="292.0" width="126.0" height="63.0" fill="#f1f5f9"/>
+<rect x="40.0" y="124.0" width="140.0" height="231.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="180.0" y="124.0" width="189.0" height="231.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="369.0" y="124.0" width="126.0" height="168.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="495.0" y="124.0" width="252.0" height="231.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="40.0" y="355.0" width="455.0" height="315.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="495.0" y="355.0" width="252.0" height="315.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="180.0" y="40.0" width="189.0" height="84.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="40.0" y="670.0" width="455.0" height="126.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<rect x="369.0" y="292.0" width="126.0" height="63.0" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<polygon points="180.0,40.0 369.0,40.0 369.0,124.0 747.0,124.0 747.0,670.0 495.0,670.0 495.0,796.0 40.0,796.0 40.0,124.0 180.0,124.0" fill="none" stroke="#334155" stroke-width="6" stroke-linejoin="miter"/>
+<rect x="193" y="35" width="163" height="10" fill="#fff"/>
+<line x1="194" y1="37.8" x2="355" y2="37.8" stroke="#7dd3fc" stroke-width="1.6"/>
+<line x1="194" y1="41.0" x2="355" y2="41.0" stroke="#7dd3fc" stroke-width="1.6"/>
+<rect x="67" y="119" width="86" height="10" fill="#fff"/>
+<line x1="68" y1="121.8" x2="152" y2="121.8" stroke="#7dd3fc" stroke-width="1.6"/>
+<line x1="68" y1="125.0" x2="152" y2="125.0" stroke="#7dd3fc" stroke-width="1.6"/>
+<rect x="382" y="119" width="100" height="10" fill="#fff"/>
+<line x1="383" y1="121.8" x2="481" y2="121.8" stroke="#7dd3fc" stroke-width="1.6"/>
+<line x1="383" y1="125.0" x2="481" y2="125.0" stroke="#7dd3fc" stroke-width="1.6"/>
+<rect x="529" y="119" width="177" height="10" fill="#fff"/>
+<line x1="530" y1="121.8" x2="705" y2="121.8" stroke="#7dd3fc" stroke-width="1.6"/>
+<line x1="530" y1="125.0" x2="705" y2="125.0" stroke="#7dd3fc" stroke-width="1.6"/>
+<rect x="742" y="179" width="10" height="128" fill="#fff"/>
+<line x1="744.8" y1="180" x2="744.8" y2="306" stroke="#7dd3fc" stroke-width="1.6"/>
+<line x1="748.0" y1="180" x2="748.0" y2="306" stroke="#7dd3fc" stroke-width="1.6"/>
+<rect x="742" y="424" width="10" height="177" fill="#fff"/>
+<line x1="744.8" y1="425" x2="744.8" y2="600" stroke="#7dd3fc" stroke-width="1.6"/>
+<line x1="748.0" y1="425" x2="748.0" y2="600" stroke="#7dd3fc" stroke-width="1.6"/>
+<rect x="74" y="791" width="387" height="10" fill="#fff"/>
+<line x1="75" y1="793.8" x2="460" y2="793.8" stroke="#7dd3fc" stroke-width="1.6"/>
+<line x1="75" y1="797.0" x2="460" y2="797.0" stroke="#7dd3fc" stroke-width="1.6"/>
+<rect x="36.5" y="481" width="7.0" height="56" fill="#fff"/>
+<path d="M 37.5 481 A 16 16 0 0 1 37.5 497" fill="none" stroke="#7c8aa0" stroke-width="1.7"/>
+<rect x="236" y="120.5" width="84" height="7.0" fill="#fff"/>
+<path d="M 236 121.5 A 16 16 0 0 1 252 121.5" fill="none" stroke="#7c8aa0" stroke-width="1.7"/>
+<rect x="68" y="351.5" width="63" height="7.0" fill="#fff"/>
+<path d="M 68 352.5 A 16 16 0 0 1 84 352.5" fill="none" stroke="#7c8aa0" stroke-width="1.7"/>
+<rect x="236" y="351.5" width="63" height="7.0" fill="#fff"/>
+<path d="M 236 352.5 A 16 16 0 0 1 252 352.5" fill="none" stroke="#7c8aa0" stroke-width="1.7"/>
+<rect x="404" y="288.5" width="56" height="7.0" fill="#fff"/>
+<path d="M 404 289.5 A 16 16 0 0 1 420 289.5" fill="none" stroke="#7c8aa0" stroke-width="1.7"/>
+<rect x="491.5" y="299" width="7.0" height="49" fill="#fff"/>
+<path d="M 492.5 299 A 16 16 0 0 1 492.5 315" fill="none" stroke="#7c8aa0" stroke-width="1.7"/>
+<rect x="491.5" y="411" width="7.0" height="56" fill="#fff"/>
+<path d="M 492.5 411 A 16 16 0 0 1 492.5 427" fill="none" stroke="#7c8aa0" stroke-width="1.7"/>
+<rect x="145" y="666.5" width="140" height="7.0" fill="#fff"/>
+<path d="M 145 667.5 A 16 16 0 0 1 161 667.5" fill="none" stroke="#7c8aa0" stroke-width="1.7"/>
+<text x="82.0" y="340.7" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">厨房</text>
+<text x="319.0" y="340.7" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">次卧</text>
+<text x="406.8" y="277.7" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">卫生间</text>
+<text x="545.0" y="150.0" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">主卧</text>
+<text x="445.0" y="655.7" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">客厅 · 餐厅</text>
+<text x="697.0" y="655.7" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">三卧（第三卧室）</text>
+<text x="230.0" y="63.52" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">北阳台</text>
+<text x="445.0" y="696.0" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">南阳台</text>
+<text x="406.8" y="309.64" text-anchor="middle" font-size="14" fill="#475569" letter-spacing="1.2" font-weight="500">过道</text>
+<g transform="translate(858,720)"><circle r="17" fill="#fff" stroke="#cbd5e1"/><path d="M0,-11 L5,7 L0,3 L-5,7 Z" fill="#334155"/><text x="0" y="-19" text-anchor="middle" font-size="10" fill="#64748b">N</text></g>
+<g transform="translate(55,840)"><line x1="0" y1="0" x2="140" y2="0" stroke="#334155" stroke-width="2"/><line x1="0" y1="-4" x2="0" y2="4" stroke="#334155" stroke-width="2"/><line x1="70" y1="-3" x2="70" y2="3" stroke="#334155" stroke-width="1.5"/><line x1="140" y1="-4" x2="140" y2="4" stroke="#334155" stroke-width="2"/><text x="0" y="16" font-size="10" fill="#64748b" text-anchor="middle">0</text><text x="70" y="16" font-size="10" fill="#64748b" text-anchor="middle">1</text><text x="140" y="16" font-size="10" fill="#64748b" text-anchor="middle">2 m（示意）</text></g>
+<g class="dev" data-no="1" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="274.5" cy="78.5" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="274.5" y="82.5" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">1</text><text x="274.5" y="106.5" text-anchor="middle" font-size="10" fill="#334155">阳台门磁</text></g>
+<g class="dev" data-no="2" data-dom="设备健康" data-base="1" data-ir="0" style="--c:#14b8a6"><circle cx="75.0" cy="173.0" r="12.5" fill="#14b8a6" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="75.0" y="177.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">2</text><text x="75.0" y="201.0" text-anchor="middle" font-size="10" fill="#334155">冰箱</text></g>
+<g class="dev" data-no="3" data-dom="饮食与膳食" data-base="1" data-ir="0" style="--c:#f97316"><circle cx="145.0" cy="173.0" r="12.5" fill="#f97316" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="145.0" y="177.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">3</text><text x="145.0" y="201.0" text-anchor="middle" font-size="10" fill="#334155">厨房小电</text></g>
+<g class="dev" data-no="4" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="75.0" cy="278.0" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="75.0" y="282.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">4</text><text x="75.0" y="306.0" text-anchor="middle" font-size="10" fill="#334155">人体存在</text></g>
+<g class="dev" data-no="5" data-dom="安全守护" data-base="0" data-ir="0" style="--c:#64748b"><circle cx="145.0" cy="278.0" r="12.5" fill="#fff" stroke="#64748b" stroke-width="2.2" stroke-dasharray="4 2.5"/><text x="145.0" y="282.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#64748b">5</text><text x="145.0" y="306.0" text-anchor="middle" font-size="10" fill="#94a3b8">烟雾水浸</text></g>
+<g class="dev" data-no="6" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="222.0" cy="180.0" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="222.0" y="184.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">6</text><text x="222.0" y="208.0" text-anchor="middle" font-size="10" fill="#334155">人体存在</text></g>
+<g class="dev" data-no="7" data-dom="设备健康" data-base="1" data-ir="1" style="--c:#14b8a6"><circle cx="327.0" cy="180.0" r="16.5" fill="none" stroke="#14b8a6" stroke-width="1.3" opacity="0.55"/><circle cx="327.0" cy="180.0" r="12.5" fill="#14b8a6" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="327.0" y="184.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">7</text><text x="327.0" y="208.0" text-anchor="middle" font-size="10" fill="#334155">红外转发</text></g>
+<g class="dev" data-no="8" data-dom="能耗与物资" data-base="0" data-ir="0" style="--c:#f59e0b"><circle cx="222.0" cy="299.0" r="12.5" fill="#fff" stroke="#f59e0b" stroke-width="2.2" stroke-dasharray="4 2.5"/><text x="222.0" y="303.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#f59e0b">8</text><text x="222.0" y="327.0" text-anchor="middle" font-size="10" fill="#94a3b8">空调</text></g>
+<g class="dev" data-no="9" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="400.5" cy="173.0" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="400.5" y="177.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">9</text><text x="400.5" y="201.0" text-anchor="middle" font-size="10" fill="#334155">人体存在</text></g>
+<g class="dev" data-no="10" data-dom="设备健康" data-base="1" data-ir="1" style="--c:#14b8a6"><circle cx="463.5" cy="173.0" r="16.5" fill="none" stroke="#14b8a6" stroke-width="1.3" opacity="0.55"/><circle cx="463.5" cy="173.0" r="12.5" fill="#14b8a6" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="463.5" y="177.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">10</text><text x="463.5" y="201.0" text-anchor="middle" font-size="10" fill="#334155">红外转发</text></g>
+<g class="dev" data-no="11" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="544.0" cy="180.0" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="544.0" y="184.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">11</text><text x="544.0" y="208.0" text-anchor="middle" font-size="10" fill="#334155">人体存在</text></g>
+<g class="dev" data-no="12" data-dom="设备健康" data-base="1" data-ir="1" style="--c:#14b8a6"><circle cx="698.0" cy="180.0" r="16.5" fill="none" stroke="#14b8a6" stroke-width="1.3" opacity="0.55"/><circle cx="698.0" cy="180.0" r="12.5" fill="#14b8a6" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="698.0" y="184.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">12</text><text x="698.0" y="208.0" text-anchor="middle" font-size="10" fill="#334155">红外转发</text></g>
+<g class="dev" data-no="13" data-dom="能耗与物资" data-base="0" data-ir="0" style="--c:#f59e0b"><circle cx="544.0" cy="299.0" r="12.5" fill="#fff" stroke="#f59e0b" stroke-width="2.2" stroke-dasharray="4 2.5"/><text x="544.0" y="303.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#f59e0b">13</text><text x="544.0" y="327.0" text-anchor="middle" font-size="10" fill="#94a3b8">空调</text></g>
+<g class="dev" data-no="14" data-dom="上下文依据" data-base="0" data-ir="0" style="--c:#0ea5e9"><circle cx="698.0" cy="299.0" r="12.5" fill="#fff" stroke="#0ea5e9" stroke-width="2.2" stroke-dasharray="4 2.5"/><text x="698.0" y="303.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0ea5e9">14</text><text x="698.0" y="327.0" text-anchor="middle" font-size="10" fill="#94a3b8">环境</text></g>
+<g class="dev" data-no="15" data-dom="基础设施" data-base="1" data-ir="0" style="--c:#8b5cf6"><circle cx="96.0" cy="418.0" r="12.5" fill="#8b5cf6" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="96.0" y="422.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">15</text><text x="96.0" y="446.0" text-anchor="middle" font-size="10" fill="#334155">网关</text></g>
+<g class="dev" data-no="16" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="201.0" cy="418.0" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="201.0" y="422.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">16</text><text x="201.0" y="446.0" text-anchor="middle" font-size="10" fill="#334155">人体存在</text></g>
+<g class="dev" data-no="17" data-dom="上下文依据" data-base="1" data-ir="0" style="--c:#0ea5e9"><circle cx="306.0" cy="418.0" r="12.5" fill="#0ea5e9" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="306.0" y="422.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">17</text><text x="306.0" y="446.0" text-anchor="middle" font-size="10" fill="#334155">环境</text></g>
+<g class="dev" data-no="18" data-dom="能耗与物资" data-base="1" data-ir="0" style="--c:#f59e0b"><circle cx="411.0" cy="418.0" r="12.5" fill="#f59e0b" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="411.0" y="422.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">18</text><text x="411.0" y="446.0" text-anchor="middle" font-size="10" fill="#334155">电视路由</text></g>
+<g class="dev" data-no="19" data-dom="设备健康" data-base="1" data-ir="1" style="--c:#14b8a6"><circle cx="96.0" cy="558.0" r="16.5" fill="none" stroke="#14b8a6" stroke-width="1.3" opacity="0.55"/><circle cx="96.0" cy="558.0" r="12.5" fill="#14b8a6" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="96.0" y="562.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">19</text><text x="96.0" y="586.0" text-anchor="middle" font-size="10" fill="#334155">红外转发</text></g>
+<g class="dev" data-no="20" data-dom="能耗与物资" data-base="0" data-ir="0" style="--c:#f59e0b"><circle cx="201.0" cy="558.0" r="12.5" fill="#fff" stroke="#f59e0b" stroke-width="2.2" stroke-dasharray="4 2.5"/><text x="201.0" y="562.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#f59e0b">20</text><text x="201.0" y="586.0" text-anchor="middle" font-size="10" fill="#94a3b8">空调</text></g>
+<g class="dev" data-no="21" data-dom="能耗与物资" data-base="0" data-ir="0" style="--c:#f59e0b"><circle cx="306.0" cy="558.0" r="12.5" fill="#fff" stroke="#f59e0b" stroke-width="2.2" stroke-dasharray="4 2.5"/><text x="306.0" y="562.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#f59e0b">21</text><text x="306.0" y="586.0" text-anchor="middle" font-size="10" fill="#94a3b8">回路CT</text></g>
+<g class="dev" data-no="22" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="411.0" cy="558.0" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="411.0" y="562.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">22</text><text x="411.0" y="586.0" text-anchor="middle" font-size="10" fill="#334155">入户门磁</text></g>
+<g class="dev" data-no="23" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="551.0" cy="425.0" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="551.0" y="429.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">23</text><text x="551.0" y="453.0" text-anchor="middle" font-size="10" fill="#334155">人体存在</text></g>
+<g class="dev" data-no="24" data-dom="设备健康" data-base="1" data-ir="1" style="--c:#14b8a6"><circle cx="691.0" cy="425.0" r="16.5" fill="none" stroke="#14b8a6" stroke-width="1.3" opacity="0.55"/><circle cx="691.0" cy="425.0" r="12.5" fill="#14b8a6" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="691.0" y="429.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">24</text><text x="691.0" y="453.0" text-anchor="middle" font-size="10" fill="#334155">红外转发</text></g>
+<g class="dev" data-no="25" data-dom="能耗与物资" data-base="0" data-ir="0" style="--c:#f59e0b"><circle cx="551.0" cy="579.0" r="12.5" fill="#fff" stroke="#f59e0b" stroke-width="2.2" stroke-dasharray="4 2.5"/><text x="551.0" y="583.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#f59e0b">25</text><text x="551.0" y="607.0" text-anchor="middle" font-size="10" fill="#94a3b8">空调</text></g>
+<g class="dev" data-no="26" data-dom="家务与作息" data-base="1" data-ir="0" style="--c:#6366f1"><circle cx="124.0" cy="726.0" r="12.5" fill="#6366f1" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="124.0" y="730.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">26</text><text x="124.0" y="754.0" text-anchor="middle" font-size="10" fill="#334155">洗衣机</text></g>
+<g class="dev" data-no="27" data-dom="设备健康" data-base="1" data-ir="1" style="--c:#14b8a6"><circle cx="257.0" cy="726.0" r="16.5" fill="none" stroke="#14b8a6" stroke-width="1.3" opacity="0.55"/><circle cx="257.0" cy="726.0" r="12.5" fill="#14b8a6" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="257.0" y="730.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">27</text><text x="257.0" y="754.0" text-anchor="middle" font-size="10" fill="#334155">红外转发</text></g>
+<g class="dev" data-no="28" data-dom="宠物照护" data-base="1" data-ir="0" style="--c:#ec4899"><circle cx="390.0" cy="726.0" r="12.5" fill="#ec4899" stroke="#fff" stroke-width="2" filter="url(#sh)"/><text x="390.0" y="730.0" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">28</text><text x="390.0" y="754.0" text-anchor="middle" font-size="10" fill="#334155">宠物投喂</text></g>
+</svg></section>
+  <aside class="card detail">
+    <h3>点位详情</h3>
+    <p class="hint" id="hint">点击平面图上的编号，或点击下表任一行。</p>
+    <div id="d-body"></div>
+    <div class="legendbox">
+      <div><span class="badge-demo" style="background:#6366f1"></span>实心圈 = 基础配置</div>
+      <div><span class="badge-demo" style="background:#fff;border:2px dashed #94a3b8"></span>虚线圈 = 可选扩展</div>
+      <div><span class="badge-demo" style="background:#fff;border:2px solid #94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.35)"></span>带外环 = <b style="color:#047857">红外转发器</b></div>
+      <div style="margin-top:8px;line-height:1.5">室内只有传感器事件、<b style="color:#0f172a">不装摄像头</b>：人体存在用毫米波雷达，不采集图像与生物特征。</div>
+    </div>
+  </aside>
+</div>
+
+<div class="note src">
+  <b>户型出处（非自绘）：</b>取自<b>齐家网 jia.com「三室一厅装修平面图」</b>的真实户型图。
+  该图尺寸线经放大裁切逐段核实：横向 <code>2000+2700+1800+3600 = 10100 mm</code>，
+  纵向 <code>1200+3300+4500+1800 = 10800 mm</code>；外轮廓 <b>93.7 ㎡</b>（去掉南北阳台主体 78.8 ㎡，阳台按半计 ≈<b>86 ㎡</b>）。
+  原图存于 <code>05图表图纸/参考-户型图-齐家网三室一厅.jpg</code>，可对照。
+</div>
+
+<div class="note">
+  <b>这张图要说明什么：</b>全屋 <b>没有更换任何一件家电</b>。4 台空调、电视、机顶盒、浴霸、电动晾衣架、洗衣机都保持原样，
+  只在<b>原有插座上串入计量插座</b>、在<b>门框与吊顶加装小器械</b>，基础配置 <b>¥1317.6</b>。
+  所有点位采集到的信号统一汇入网关，进入同一套数仓 —— 这正是"中转数据分析平台统一不同厂家数据"的落地形态。
+</div>
+
+<div class="note ir">
+  <b>为什么每个房间都要一个红外转发器？</b>
+  ① 红外光<b>不能穿墙</b>，必须<b>直线视距、无遮挡</b>才能控制；
+  ② 官方参数是「360° 全向、直线有效约 <b>10 米</b>、<b>可有效覆盖同一房间内的家电</b>」。
+  所以凡是房间里有红外遥控家电，<b>该房间就得单独配一个转发器</b> ——
+  本户型共 <b>6 个</b>：次卧、卫生间、主卧、客厅、三卧、南阳台。
+  老式红外家电因此被纳入统一控制，同时把遥控动作回传成事件，与计量插座的功率曲线交叉验证。
+</div>
+
+<h2 class="sec">安装点位一览</h2>
+<div class="card" style="overflow:hidden">
+<table>
+<thead><tr><th>编号</th><th>设备</th><th>安装位置</th><th>采集信号 / 作用</th><th>分析域</th><th>单价</th><th>配置</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="7">厨房<span class="cnt">4 处</span></td></tr>
+<tr data-no="2" data-dom="设备健康" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#14b8a6">2</span></td><td class="c-name">冰箱计量插座<div class="sub">冰箱</div></td><td class="c-pos">冰箱后方插座位（用原有插座，不换设备）</td><td class="c-sig">冰箱功率曲线 → 启停周期、门未关严/制冷衰退征兆</td><td class="c-dom"><span class="dom" style="--c:#14b8a6">设备健康</span></td><td class="c-price">¥59</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="3" data-dom="饮食与膳食" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#f97316">3</span></td><td class="c-name">厨房小电计量插座<div class="sub">厨房小电</div></td><td class="c-pos">操作台面插座（电饭煲/微波炉/热水壶）</td><td class="c-sig">做饭时段与时长 → 家务负荷、饮食规律</td><td class="c-dom"><span class="dom" style="--c:#f97316">饮食与膳食</span></td><td class="c-price">¥59</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="4" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">4</span></td><td class="c-name">毫米波人体存在传感器<div class="sub">人体存在</div></td><td class="c-pos">厨房吊顶（非侵入、不采影像）</td><td class="c-sig">有人/无人与停留时长 → 烹饪停留、燃气无人值守提醒</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥53.75</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="5" data-dom="安全守护" data-base="0" data-ir="0"><td class="c-no"><span class="dot" style="background:#64748b">5</span></td><td class="c-name">烟雾·水浸传感器<div class="sub">烟雾水浸</div></td><td class="c-pos">灶台上方吊顶 + 水槽下方地面</td><td class="c-sig">烟雾/漏水事件 → 安全守护（选做域）</td><td class="c-dom"><span class="dom" style="--c:#64748b">安全守护</span></td><td class="c-price">¥68.5</td><td class="c-tag"><span class="tag opt">可选</span></td></tr>
+<tr class="grp"><td colspan="7">次卧<span class="cnt">3 处</span></td></tr>
+<tr data-no="6" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">6</span></td><td class="c-name">毫米波人体存在传感器<div class="sub">人体存在</div></td><td class="c-pos">次卧吊顶</td><td class="c-sig">使用时长 → 作息与家务负荷分配</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥53.75</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="7" data-dom="设备健康" data-base="1" data-ir="1"><td class="c-no"><span class="dot" style="background:#14b8a6">7</span></td><td class="c-name">红外转发器（次卧）★<div class="sub">红外转发</div></td><td class="c-pos">次卧床头柜上方、对准挂机（同房间直线视距）</td><td class="c-sig">转发红外指令 → 覆盖次卧空调；与插座功率交叉验证</td><td class="c-dom"><span class="dom" style="--c:#14b8a6">设备健康</span></td><td class="c-price">¥48</td><td class="c-tag"><span class="tag base">基础</span><span class="tag ir">红外</span></td></tr>
+<tr data-no="8" data-dom="能耗与物资" data-base="0" data-ir="0"><td class="c-no"><span class="dot" style="background:#f59e0b">8</span></td><td class="c-name">空调计量插座（16A）<div class="sub">空调</div></td><td class="c-pos">次卧挂机专用插座位</td><td class="c-sig">空调能耗 × 人在与否 → 空转判定</td><td class="c-dom"><span class="dom" style="--c:#f59e0b">能耗与物资</span></td><td class="c-price">¥79</td><td class="c-tag"><span class="tag opt">可选</span></td></tr>
+<tr class="grp"><td colspan="7">卫生间<span class="cnt">2 处</span></td></tr>
+<tr data-no="9" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">9</span></td><td class="c-name">毫米波人体存在传感器<div class="sub">人体存在</div></td><td class="c-pos">卫生间吊顶（替代摄像方案，保护隐私）</td><td class="c-sig">洗浴/如厕时长 → 家务负荷、长辈异常滞留预警</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥53.75</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="10" data-dom="设备健康" data-base="1" data-ir="1"><td class="c-no"><span class="dot" style="background:#14b8a6">10</span></td><td class="c-name">红外转发器（卫生间）★<div class="sub">红外转发</div></td><td class="c-pos">卫生间吊顶外侧、对准浴霸红外接收窗</td><td class="c-sig">转发红外指令 → 覆盖浴霸（取暖/换气/照明）</td><td class="c-dom"><span class="dom" style="--c:#14b8a6">设备健康</span></td><td class="c-price">¥48</td><td class="c-tag"><span class="tag base">基础</span><span class="tag ir">红外</span></td></tr>
+<tr class="grp"><td colspan="7">主卧<span class="cnt">4 处</span></td></tr>
+<tr data-no="11" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">11</span></td><td class="c-name">毫米波人体存在传感器<div class="sub">人体存在</div></td><td class="c-pos">主卧吊顶（覆盖床与门口）</td><td class="c-sig">入睡/离床时刻 → 作息基线、夜间照护</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥53.75</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="12" data-dom="设备健康" data-base="1" data-ir="1"><td class="c-no"><span class="dot" style="background:#14b8a6">12</span></td><td class="c-name">红外转发器（主卧）★<div class="sub">红外转发</div></td><td class="c-pos">主卧床头柜上方、对准挂机</td><td class="c-sig">转发红外指令 → 覆盖主卧空调、风扇</td><td class="c-dom"><span class="dom" style="--c:#14b8a6">设备健康</span></td><td class="c-price">¥48</td><td class="c-tag"><span class="tag base">基础</span><span class="tag ir">红外</span></td></tr>
+<tr data-no="13" data-dom="能耗与物资" data-base="0" data-ir="0"><td class="c-no"><span class="dot" style="background:#f59e0b">13</span></td><td class="c-name">空调计量插座（16A）<div class="sub">空调</div></td><td class="c-pos">主卧挂机专用插座位</td><td class="c-sig">空调运行 × 人在与否 → 判定空转浪费</td><td class="c-dom"><span class="dom" style="--c:#f59e0b">能耗与物资</span></td><td class="c-price">¥79</td><td class="c-tag"><span class="tag opt">可选</span></td></tr>
+<tr data-no="14" data-dom="上下文依据" data-base="0" data-ir="0"><td class="c-no"><span class="dot" style="background:#0ea5e9">14</span></td><td class="c-name">温湿度环境传感器<div class="sub">环境</div></td><td class="c-pos">主卧床头墙面（离地约 1.5m）</td><td class="c-sig">卧室温湿度 → 睡眠舒适度判断依据</td><td class="c-dom"><span class="dom" style="--c:#0ea5e9">上下文依据</span></td><td class="c-price">¥68.5</td><td class="c-tag"><span class="tag opt">可选</span></td></tr>
+<tr class="grp"><td colspan="7">客厅 · 餐厅<span class="cnt">8 处</span></td></tr>
+<tr data-no="15" data-dom="基础设施" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#8b5cf6">15</span></td><td class="c-name">智能网关<div class="sub">网关</div></td><td class="c-pos">客厅电视柜上方（全屋信号中心，需常电）</td><td class="c-sig">Zigbee/蓝牙 Mesh 汇聚 → 所有设备的接入与转发</td><td class="c-dom"><span class="dom" style="--c:#8b5cf6">基础设施</span></td><td class="c-price">¥250</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="16" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">16</span></td><td class="c-name">毫米波人体存在传感器<div class="sub">人体存在</div></td><td class="c-pos">客厅吊顶（覆盖沙发—餐厅动线）</td><td class="c-sig">有人时长 → 作息基线；与空调运行比对可判空转</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥53.75</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="17" data-dom="上下文依据" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#0ea5e9">17</span></td><td class="c-name">温湿度环境传感器<div class="sub">环境</div></td><td class="c-pos">客厅离地约 1.5m 的墙面（避开空调出风）</td><td class="c-sig">室内温湿度 → 判断依据（上下文），不进分子分母</td><td class="c-dom"><span class="dom" style="--c:#0ea5e9">上下文依据</span></td><td class="c-price">¥68.5</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="18" data-dom="能耗与物资" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#f59e0b">18</span></td><td class="c-name">电视·路由器计量插座<div class="sub">电视路由</div></td><td class="c-pos">电视柜插座位</td><td class="c-sig">待机功耗 → 隐形续费金额、费用结构</td><td class="c-dom"><span class="dom" style="--c:#f59e0b">能耗与物资</span></td><td class="c-price">¥59</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="19" data-dom="设备健康" data-base="1" data-ir="1"><td class="c-no"><span class="dot" style="background:#14b8a6">19</span></td><td class="c-name">红外转发器（客厅）★<div class="sub">红外转发</div></td><td class="c-pos">电视柜上方、对准空调柜机与电视（同房间直线视距）</td><td class="c-sig">转发红外指令并回传状态 → 覆盖空调柜机/电视/机顶盒/风扇</td><td class="c-dom"><span class="dom" style="--c:#14b8a6">设备健康</span></td><td class="c-price">¥48</td><td class="c-tag"><span class="tag base">基础</span><span class="tag ir">红外</span></td></tr>
+<tr data-no="20" data-dom="能耗与物资" data-base="0" data-ir="0"><td class="c-no"><span class="dot" style="background:#f59e0b">20</span></td><td class="c-name">空调计量插座（16A）<div class="sub">空调</div></td><td class="c-pos">客厅柜机专用插座位</td><td class="c-sig">空调能耗曲线 → 峰谷优化收益、设备健康</td><td class="c-dom"><span class="dom" style="--c:#f59e0b">能耗与物资</span></td><td class="c-price">¥79</td><td class="c-tag"><span class="tag opt">可选</span></td></tr>
+<tr data-no="21" data-dom="能耗与物资" data-base="0" data-ir="0"><td class="c-no"><span class="dot" style="background:#f59e0b">21</span></td><td class="c-name">回路计量（CT 电流钳）<div class="sub">回路CT</div></td><td class="c-pos">配电箱内，钳总回路 + 各空调支路（入户门旁）</td><td class="c-sig">全屋总功率序列 → NILM 分解出单台电器用电</td><td class="c-dom"><span class="dom" style="--c:#f59e0b">能耗与物资</span></td><td class="c-price">—</td><td class="c-tag"><span class="tag opt">可选</span></td></tr>
+<tr data-no="22" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">22</span></td><td class="c-name">入户门磁传感器<div class="sub">入户门磁</div></td><td class="c-pos">入户门框上沿（门内一侧）</td><td class="c-sig">开门事件与时序 → 居家/外出判定、到离时刻基线</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥46.8</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr class="grp"><td colspan="7">三卧（第三卧室）<span class="cnt">3 处</span></td></tr>
+<tr data-no="23" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">23</span></td><td class="c-name">毫米波人体存在传感器<div class="sub">人体存在</div></td><td class="c-pos">三卧吊顶（书房/儿童房）</td><td class="c-sig">使用时长 → 作息基线、儿童房夜间活动</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥53.75</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="24" data-dom="设备健康" data-base="1" data-ir="1"><td class="c-no"><span class="dot" style="background:#14b8a6">24</span></td><td class="c-name">红外转发器（三卧）★<div class="sub">红外转发</div></td><td class="c-pos">三卧书桌旁、对准挂机</td><td class="c-sig">转发红外指令 → 覆盖三卧空调</td><td class="c-dom"><span class="dom" style="--c:#14b8a6">设备健康</span></td><td class="c-price">¥48</td><td class="c-tag"><span class="tag base">基础</span><span class="tag ir">红外</span></td></tr>
+<tr data-no="25" data-dom="能耗与物资" data-base="0" data-ir="0"><td class="c-no"><span class="dot" style="background:#f59e0b">25</span></td><td class="c-name">空调计量插座（16A）<div class="sub">空调</div></td><td class="c-pos">三卧挂机专用插座位</td><td class="c-sig">空调能耗 × 人在与否 → 空转判定</td><td class="c-dom"><span class="dom" style="--c:#f59e0b">能耗与物资</span></td><td class="c-price">¥79</td><td class="c-tag"><span class="tag opt">可选</span></td></tr>
+<tr class="grp"><td colspan="7">北阳台<span class="cnt">1 处</span></td></tr>
+<tr data-no="1" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">1</span></td><td class="c-name">阳台推拉门磁<div class="sub">阳台门磁</div></td><td class="c-pos">北阳台推拉门框</td><td class="c-sig">开合事件 → 通风/晾晒行为、离家未关窗提醒</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥46.8</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr class="grp"><td colspan="7">南阳台<span class="cnt">3 处</span></td></tr>
+<tr data-no="26" data-dom="家务与作息" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#6366f1">26</span></td><td class="c-name">洗衣机计量插座<div class="sub">洗衣机</div></td><td class="c-pos">南阳台洗衣机插座位</td><td class="c-sig">洗衣频次与时段 → 家务负荷基尼系数</td><td class="c-dom"><span class="dom" style="--c:#6366f1">家务与作息</span></td><td class="c-price">¥59</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+<tr data-no="27" data-dom="设备健康" data-base="1" data-ir="1"><td class="c-no"><span class="dot" style="background:#14b8a6">27</span></td><td class="c-name">红外转发器（南阳台）★<div class="sub">红外转发</div></td><td class="c-pos">南阳台顶面、对准电动晾衣架接收窗</td><td class="c-sig">转发红外指令 → 覆盖电动晾衣架（升降/照明/烘干）</td><td class="c-dom"><span class="dom" style="--c:#14b8a6">设备健康</span></td><td class="c-price">¥48</td><td class="c-tag"><span class="tag base">基础</span><span class="tag ir">红外</span></td></tr>
+<tr data-no="28" data-dom="宠物照护" data-base="1" data-ir="0"><td class="c-no"><span class="dot" style="background:#ec4899">28</span></td><td class="c-name">宠物喂食·饮水计量插座<div class="sub">宠物投喂</div></td><td class="c-pos">南阳台宠物角插座位</td><td class="c-sig">投喂时段与频次 → 宠物照护基线、漏喂提醒</td><td class="c-dom"><span class="dom" style="--c:#ec4899">宠物照护</span></td><td class="c-price">¥59</td><td class="c-tag"><span class="tag base">基础</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<footer>
+  <b>口径说明</b>：单价为公开电商在售价（计量插座 ¥59、门窗传感器 ¥46.8、人体存在 ¥53.75、环境传感器 ¥68.5、
+  <b>红外转发器 ¥48</b>（米家万能遥控器，首发 ¥79、现价 ¥48）、空调 16A 计量插座 ¥79、网关 ¥250）；
+  回路计量（CT）需电工接入配电箱、随网关支路计价，故单价记「—」。
+  基础配置合计 <b>¥1317.6</b>（三室一厅，含 6 个红外转发）。
+  <br>房间几何按真图尺寸等比绘制；门窗为按房间关系落位，不作为工程图纸。
+</footer>
+</div>
+
+<script>
+const DEV = [[1, "北阳台", [274.5, 78.5], "阳台门磁", "阳台推拉门磁", "北阳台推拉门框", "开合事件 → 通风/晾晒行为、离家未关窗提醒", "家务与作息", 46.8, true, false], [2, "厨房", [75.0, 173.0], "冰箱", "冰箱计量插座", "冰箱后方插座位（用原有插座，不换设备）", "冰箱功率曲线 → 启停周期、门未关严/制冷衰退征兆", "设备健康", 59.0, true, false], [3, "厨房", [145.0, 173.0], "厨房小电", "厨房小电计量插座", "操作台面插座（电饭煲/微波炉/热水壶）", "做饭时段与时长 → 家务负荷、饮食规律", "饮食与膳食", 59.0, true, false], [4, "厨房", [75.0, 278.0], "人体存在", "毫米波人体存在传感器", "厨房吊顶（非侵入、不采影像）", "有人/无人与停留时长 → 烹饪停留、燃气无人值守提醒", "家务与作息", 53.75, true, false], [5, "厨房", [145.0, 278.0], "烟雾水浸", "烟雾·水浸传感器", "灶台上方吊顶 + 水槽下方地面", "烟雾/漏水事件 → 安全守护（选做域）", "安全守护", 68.5, false, false], [6, "次卧", [222.0, 180.0], "人体存在", "毫米波人体存在传感器", "次卧吊顶", "使用时长 → 作息与家务负荷分配", "家务与作息", 53.75, true, false], [7, "次卧", [327.0, 180.0], "红外转发", "红外转发器（次卧）★", "次卧床头柜上方、对准挂机（同房间直线视距）", "转发红外指令 → 覆盖次卧空调；与插座功率交叉验证", "设备健康", 48.0, true, true], [8, "次卧", [222.0, 299.0], "空调", "空调计量插座（16A）", "次卧挂机专用插座位", "空调能耗 × 人在与否 → 空转判定", "能耗与物资", 79.0, false, false], [9, "卫生间", [400.5, 173.0], "人体存在", "毫米波人体存在传感器", "卫生间吊顶（替代摄像方案，保护隐私）", "洗浴/如厕时长 → 家务负荷、长辈异常滞留预警", "家务与作息", 53.75, true, false], [10, "卫生间", [463.5, 173.0], "红外转发", "红外转发器（卫生间）★", "卫生间吊顶外侧、对准浴霸红外接收窗", "转发红外指令 → 覆盖浴霸（取暖/换气/照明）", "设备健康", 48.0, true, true], [11, "主卧", [544.0, 180.0], "人体存在", "毫米波人体存在传感器", "主卧吊顶（覆盖床与门口）", "入睡/离床时刻 → 作息基线、夜间照护", "家务与作息", 53.75, true, false], [12, "主卧", [698.0, 180.0], "红外转发", "红外转发器（主卧）★", "主卧床头柜上方、对准挂机", "转发红外指令 → 覆盖主卧空调、风扇", "设备健康", 48.0, true, true], [13, "主卧", [544.0, 299.0], "空调", "空调计量插座（16A）", "主卧挂机专用插座位", "空调运行 × 人在与否 → 判定空转浪费", "能耗与物资", 79.0, false, false], [14, "主卧", [698.0, 299.0], "环境", "温湿度环境传感器", "主卧床头墙面（离地约 1.5m）", "卧室温湿度 → 睡眠舒适度判断依据", "上下文依据", 68.5, false, false], [15, "客厅", [96.0, 418.0], "网关", "智能网关", "客厅电视柜上方（全屋信号中心，需常电）", "Zigbee/蓝牙 Mesh 汇聚 → 所有设备的接入与转发", "基础设施", 250.0, true, false], [16, "客厅", [201.0, 418.0], "人体存在", "毫米波人体存在传感器", "客厅吊顶（覆盖沙发—餐厅动线）", "有人时长 → 作息基线；与空调运行比对可判空转", "家务与作息", 53.75, true, false], [17, "客厅", [306.0, 418.0], "环境", "温湿度环境传感器", "客厅离地约 1.5m 的墙面（避开空调出风）", "室内温湿度 → 判断依据（上下文），不进分子分母", "上下文依据", 68.5, true, false], [18, "客厅", [411.0, 418.0], "电视路由", "电视·路由器计量插座", "电视柜插座位", "待机功耗 → 隐形续费金额、费用结构", "能耗与物资", 59.0, true, false], [19, "客厅", [96.0, 558.0], "红外转发", "红外转发器（客厅）★", "电视柜上方、对准空调柜机与电视（同房间直线视距）", "转发红外指令并回传状态 → 覆盖空调柜机/电视/机顶盒/风扇", "设备健康", 48.0, true, true], [20, "客厅", [201.0, 558.0], "空调", "空调计量插座（16A）", "客厅柜机专用插座位", "空调能耗曲线 → 峰谷优化收益、设备健康", "能耗与物资", 79.0, false, false], [21, "客厅", [306.0, 558.0], "回路CT", "回路计量（CT 电流钳）", "配电箱内，钳总回路 + 各空调支路（入户门旁）", "全屋总功率序列 → NILM 分解出单台电器用电", "能耗与物资", null, false, false], [22, "客厅", [411.0, 558.0], "入户门磁", "入户门磁传感器", "入户门框上沿（门内一侧）", "开门事件与时序 → 居家/外出判定、到离时刻基线", "家务与作息", 46.8, true, false], [23, "三卧", [551.0, 425.0], "人体存在", "毫米波人体存在传感器", "三卧吊顶（书房/儿童房）", "使用时长 → 作息基线、儿童房夜间活动", "家务与作息", 53.75, true, false], [24, "三卧", [691.0, 425.0], "红外转发", "红外转发器（三卧）★", "三卧书桌旁、对准挂机", "转发红外指令 → 覆盖三卧空调", "设备健康", 48.0, true, true], [25, "三卧", [551.0, 579.0], "空调", "空调计量插座（16A）", "三卧挂机专用插座位", "空调能耗 × 人在与否 → 空转判定", "能耗与物资", 79.0, false, false], [26, "南阳台", [124.0, 726.0], "洗衣机", "洗衣机计量插座", "南阳台洗衣机插座位", "洗衣频次与时段 → 家务负荷基尼系数", "家务与作息", 59.0, true, false], [27, "南阳台", [257.0, 726.0], "红外转发", "红外转发器（南阳台）★", "南阳台顶面、对准电动晾衣架接收窗", "转发红外指令 → 覆盖电动晾衣架（升降/照明/烘干）", "设备健康", 48.0, true, true], [28, "南阳台", [390.0, 726.0], "宠物投喂", "宠物喂食·饮水计量插座", "南阳台宠物角插座位", "投喂时段与频次 → 宠物照护基线、漏喂提醒", "宠物照护", 59.0, true, false]];
+const DOM = {"基础设施": "#8b5cf6", "能耗与物资": "#f59e0b", "家务与作息": "#6366f1", "设备健康": "#14b8a6", "饮食与膳食": "#f97316", "宠物照护": "#ec4899", "安全守护": "#64748b", "上下文依据": "#0ea5e9"};
+const byNo = Object.fromEntries(DEV.map(d => [d[0], d]));
+const $ = s => document.querySelector(s);
+const plan = $('#plan'), rows = [...document.querySelectorAll('tr[data-no]')];
+
+function detail(no){
+  const d = byNo[no]; if(!d) return;
+  const [, room, xy, short, full, pos, sig, dom, price, isbase, isir] = d;
+  const c = DOM[dom];
+  $('#d-body').innerHTML = `
+    <div class="d-head">
+      <div class="d-no" style="background:${c}">${no}</div>
+      <div class="d-title">${full}<small>${short} · ${room}</small></div>
+    </div>
+    <div class="d-row"><em>安装位置</em><span>${pos}</span></div>
+    <div class="d-row"><em>采集信号</em><span>${sig}</span></div>
+    <div class="d-row"><em>分析域</em><span class="dom" style="--c:${c}">${dom}</span></div>
+    <div class="d-row"><em>配置</em><span>${isbase ? '基础配置' : '可选扩展'}${isir ? ' · <b style="color:#047857">红外转发</b>' : ''}</span></div>
+    <div class="d-row"><em>单价</em><span>${price ? '¥'+price : '—（需电工接入）'}</span></div>`;
+  rows.forEach(r => r.style.background = r.dataset.no === String(no) ? '#eef2ff' : '');
+  plan.querySelectorAll('.dev').forEach(g => g.classList.toggle('hit', g.dataset.no === String(no)));
+  $('#hint').textContent = '已选中 D' + no + '，可继续点其他编号查看。';
+}
+plan.addEventListener('click', e => { const g = e.target.closest('.dev'); if (g) detail(g.dataset.no); });
+rows.forEach(r => r.addEventListener('click', () => detail(r.dataset.no)));
+
+let fDom = null, fBase = null, fIr = null;
+document.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
+  const kind = ch.dataset.filter;
+  if (kind === 'reset') { fDom = fBase = fIr = null; }
+  else if (kind === 'dom')  { fDom  = fDom  === ch.dataset.val ? null : ch.dataset.val; }
+  else if (kind === 'base') { fBase = fBase === ch.dataset.val ? null : ch.dataset.val; }
+  else if (kind === 'ir')   { fIr   = fIr   === ch.dataset.val ? null : ch.dataset.val; }
+  document.querySelectorAll('.chip').forEach(c => {
+    const k = c.dataset.filter;
+    const on = (k==='dom' && c.dataset.val===fDom) || (k==='base' && c.dataset.val===fBase) || (k==='ir' && c.dataset.val===fIr);
+    c.classList.toggle('on', !!on);
+  });
+  const hit = el => (!fDom || el.dataset.dom===fDom) && (!fBase || el.dataset.base===fBase) && (!fIr || el.dataset.ir===fIr);
+  plan.querySelectorAll('.dev').forEach(g => g.classList.toggle('hit', hit(g)));
+  rows.forEach(r => r.style.display = hit(r) ? '' : 'none');
+  document.querySelectorAll('tr.grp').forEach(gr => {
+    let nx = gr.nextElementSibling, any = false;
+    while (nx && nx.hasAttribute('data-no')) { if (nx.style.display !== 'none') any = true; nx = nx.nextElementSibling; }
+    gr.style.display = any ? '' : 'none';
+  });
+  plan.classList.toggle('dim', !!(fDom || fBase || fIr));
+}));
+</script>
+</body>
+</html>

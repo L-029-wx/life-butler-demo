@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>应急功能演示 · 电子生活管家</title>
+<style>
+:root{--ink:#0f172a;--body:#334155;--mut:#64748b;--line:#e2e8f0;--bg:#f5f7fb;--card:#fff;--pri:#6366f1;
+--l1:#dc2626;--l1bg:#fef2f2;--l1bd:#fecaca;--l2:#d97706;--l2bg:#fffbeb;--l2bd:#fde68a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);
+ font:14px/1.7 "Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif}
+.wrap{max-width:1160px;margin:0 auto;padding:26px 22px 60px}
+h1{margin:0 0 4px;font-size:25px;color:var(--ink)}
+h1 b{background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin:0 0 18px;color:var(--mut);font-size:13.5px}
+h2{font-size:17px;color:var(--ink);margin:30px 0 12px;padding-bottom:8px;border-bottom:2px solid #eef2ff}
+
+.kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:8px}
+.kpi div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi b{display:block;font-size:26px;line-height:1.15;color:var(--ink)}
+.kpi span{font-size:12px;color:var(--mut)}
+.kpi .r b{color:var(--l1)}
+.kpi .a b{color:var(--l2)}
+
+.tl{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 18px 30px;position:relative;height:96px}
+.tl .bar{position:absolute;left:18px;right:18px;top:38px;height:3px;background:#e2e8f0;border-radius:2px}
+.mk{position:absolute;top:30px;width:11px;height:11px;border-radius:50%;transform:translateX(-50%);
+ border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.08);cursor:default}
+.mk.l1{background:var(--l1)} .mk.l2{background:var(--l2)}
+.dl{position:absolute;top:56px;font-size:11px;color:var(--mut);transform:translateX(-50%)}
+.tl-note{font-size:11.5px;color:var(--mut);margin-top:4px}
+
+.ev{background:var(--card);border:1px solid var(--line);border-left:4px solid #cbd5e1;
+ border-radius:12px;padding:14px 18px;margin-bottom:14px}
+.ev.l1{border-left-color:var(--l1)}
+.ev.l2{border-left-color:var(--l2)}
+.ev-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{font-size:11.5px;font-weight:700;padding:1px 9px;border-radius:999px}
+.badge.l1{background:var(--l1bg);color:var(--l1);border:1px solid var(--l1bd)}
+.badge.l2{background:var(--l2bg);color:var(--l2);border:1px solid var(--l2bd)}
+.ev-t{font-size:15.5px;color:var(--ink)}
+.ev-loc{font-size:12px;color:var(--mut);background:#f1f5f9;border-radius:6px;padding:1px 8px}
+.ev-id{margin-left:auto;font-size:11.5px;color:#94a3b8;font-family:ui-monospace,Consolas,monospace}
+.ev-meta{display:flex;gap:22px;font-size:12.5px;color:var(--mut);margin:8px 0 10px;flex-wrap:wrap}
+.ev-meta i{font-style:normal;color:#94a3b8;margin-right:6px}
+.ev-meta b{color:var(--ink)}
+.ev-body{display:grid;grid-template-columns:1fr 300px;gap:18px}
+.lbl{font-size:11px;color:#94a3b8;letter-spacing:.04em;margin:6px 0 3px}
+.quote{margin:0 0 4px;background:#f8fafc;border-left:2px solid #cbd5e1;border-radius:0 6px 6px 0;
+ padding:8px 12px;font-size:12.5px;line-height:1.65;color:#475569}
+.sig{display:inline-block;font-size:11.5px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;
+ border-radius:999px;padding:1px 9px;margin:2px 4px 2px 0}
+.acts{margin:4px 0 0;padding-left:18px;font-size:12.5px;color:#475569}
+.acts li{margin:2px 0}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);
+ border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th{background:#f8fafc;color:var(--mut);font-size:11.5px;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+td{padding:9px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+tr:last-child td{border-bottom:0}
+.mono{font-family:ui-monospace,Consolas,monospace;color:#4338ca;font-weight:600;white-space:nowrap}
+
+.pol{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.pol .c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.pol .c h4{margin:0 0 6px;font-size:13.5px;color:var(--ink)}
+.pol .c p{margin:0;font-size:12.5px;color:#475569}
+.pol .c.l1c{border-top:3px solid var(--l1)}
+.pol .c.l2c{border-top:3px solid var(--l2)}
+.pol .c.bd{border-top:3px solid var(--prior,#6366f1);background:#fafaff}
+.note{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px 16px;
+ font-size:12.5px;margin-top:14px}
+.note b{color:#b45309}
+@media(max-width:900px){.kpi{grid-template-columns:repeat(2,1fr)}.ev-body{grid-template-columns:1fr}
+ .pol{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+
+<h1>应急功能演示 · <b>发现 → 分级 → 触达 → 留痕</b></h1>
+<p class="lead">数据源：一周模拟数据（2026-10-06 ~ 2026-10-10）。所有事件由<b>规则引擎从原始信号反推</b>，生成器未写入任何标签。</p>
+所有事件由<b>规则引擎从原始信号反推</b>，生成器未写入任何标签。</p>
+
+<div class="kpi">
+  <div><b>5</b><span>应急事件</span></div>
+  <div class="r"><b>3</b><span>一级（立即处置）</span></div>
+  <div class="a"><b>2</b><span>二级（提醒观察）</span></div>
+  <div><b>0</b><span>误报</span></div>
+  <div><b>5</b><span>触发规则</span></div>
+</div>
+
+<h2>一周时间轴</h2>
+<div class="tl">
+  <span class="bar"></span>
+  <span class="mk l2" style="left:15.58%" title="E01 夜间超长滞留 10-06 02:10"></span><span class="mk l1" style="left:21.81%" title="E02 烟雾告警 10-06 12:38"></span><span class="mk l1" style="left:30.48%" title="E03 水浸告警 10-07 03:12"></span><span class="mk l1" style="left:68.25%" title="E04 外出未关火 10-09 18:40"></span><span class="mk l2" style="left:80.26%" title="E05 白天长时静止 10-10 14:50"></span>
+  <span class="dl" style="left:0.00%">周一</span><span class="dl" style="left:14.29%">周二</span><span class="dl" style="left:28.57%">周三</span><span class="dl" style="left:42.86%">周四</span><span class="dl" style="left:57.14%">周五</span><span class="dl" style="left:71.43%">周六</span><span class="dl" style="left:85.71%">周日</span>
+</div>
+<p class="tl-note">红点 = 一级 · 橙点 = 二级 · 悬停可看事件</p>
+
+<h2>五条事件（按等级与时间排序）</h2>
+
+<div class="ev l2">
+  <div class="ev-h">
+    <span class="badge l2">二级</span>
+    <b class="ev-t">夜间超长滞留</b>
+    <span class="ev-loc">卫生间</span>
+    <span class="ev-id">E01 · R5</span>
+  </div>
+  <div class="ev-meta">
+    <span><i>时间</i>10-06 02:10 → 2026-10-06 03:10</span>
+    <span><i>持续</i><b>60</b> 分钟</span>
+    <span><i>状态</i>待确认</span>
+  </div>
+  <div class="ev-body">
+    <div class="ev-left">
+      <div class="lbl">判据（可回溯到原始数据）</div>
+      <p class="quote">卫生间 10-06 02:10 起停留 60 分钟；同期其余夜间会话中位 6 分钟，超出 10.0 倍。仅记录时长事实，不作医学判断</p>
+      <div class="lbl">参与判定的信号</div>
+      <div><span class="sig">卫生间人体存在</span></div>
+    </div>
+    <div class="ev-right">
+      <div class="lbl">处置动作</div>
+      <ul class="acts"><li>App 推送：按成员性格措辞，免打扰时段仅保留本条</li><li>家长版加一句：不制造恐慌，只陈述事实</li><li>连续 2 次或持续 ≥180 分钟 → 自动升级为一级</li><li>留痕：事件与判据写入审计</li></ul>
+    </div>
+  </div>
+</div>
+<div class="ev l1">
+  <div class="ev-h">
+    <span class="badge l1">一级</span>
+    <b class="ev-t">烟雾告警</b>
+    <span class="ev-loc">厨房</span>
+    <span class="ev-id">E02 · R1</span>
+  </div>
+  <div class="ev-meta">
+    <span><i>时间</i>10-06 12:38 → 2026-10-06 12:40</span>
+    <span><i>持续</i><b>2</b> 分钟</span>
+    <span><i>状态</i>待确认</span>
+  </div>
+  <div class="ev-body">
+    <div class="ev-left">
+      <div class="lbl">判据（可回溯到原始数据）</div>
+      <p class="quote">厨房安防传感器于 10-06 12:38 上报「烟雾」超阈值告警，持续 2 分钟后恢复</p>
+      <div class="lbl">参与判定的信号</div>
+      <div><span class="sig">安防传感器告警</span><span class="sig">恢复信号</span></div>
+    </div>
+    <div class="ev-right">
+      <div class="lbl">处置动作</div>
+      <ul class="acts"><li>语音播报：家中长辈设备立即语音提示（80 分贝，重复 3 遍）</li><li>App 强推：主事与全体成员，绕过免打扰</li><li>电话外呼：30 秒内未确认则自动呼叫紧急联系人</li><li>联动处置：切断对应回路电源 / 关闭燃气电磁阀（若已接入）</li><li>留痕：事件与处置时间线写入审计，可回溯</li></ul>
+    </div>
+  </div>
+</div>
+<div class="ev l1">
+  <div class="ev-h">
+    <span class="badge l1">一级</span>
+    <b class="ev-t">水浸告警</b>
+    <span class="ev-loc">卫生间</span>
+    <span class="ev-id">E03 · R2</span>
+  </div>
+  <div class="ev-meta">
+    <span><i>时间</i>10-07 03:12 → 2026-10-07 03:18</span>
+    <span><i>持续</i><b>6</b> 分钟</span>
+    <span><i>状态</i>待确认</span>
+  </div>
+  <div class="ev-body">
+    <div class="ev-left">
+      <div class="lbl">判据（可回溯到原始数据）</div>
+      <p class="quote">卫生间安防传感器于 10-07 03:12 上报「水浸」超阈值告警，持续 6 分钟后恢复</p>
+      <div class="lbl">参与判定的信号</div>
+      <div><span class="sig">安防传感器告警</span><span class="sig">恢复信号</span></div>
+    </div>
+    <div class="ev-right">
+      <div class="lbl">处置动作</div>
+      <ul class="acts"><li>语音播报：家中长辈设备立即语音提示（80 分贝，重复 3 遍）</li><li>App 强推：主事与全体成员，绕过免打扰</li><li>电话外呼：30 秒内未确认则自动呼叫紧急联系人</li><li>联动处置：切断对应回路电源 / 关闭燃气电磁阀（若已接入）</li><li>留痕：事件与处置时间线写入审计，可回溯</li></ul>
+    </div>
+  </div>
+</div>
+<div class="ev l1">
+  <div class="ev-h">
+    <span class="badge l1">一级</span>
+    <b class="ev-t">外出未关火</b>
+    <span class="ev-loc">厨房</span>
+    <span class="ev-id">E04 · R3</span>
+  </div>
+  <div class="ev-meta">
+    <span><i>时间</i>10-09 18:40 → 2026-10-09 19:23</span>
+    <span><i>持续</i><b>43</b> 分钟</span>
+    <span><i>状态</i>待确认</span>
+  </div>
+  <div class="ev-body">
+    <div class="ev-left">
+      <div class="lbl">判据（可回溯到原始数据）</div>
+      <p class="quote">灶台 10-09 18:40–10-09 19:23 通电（累计 24 分钟功率 &gt;100W），而全屋五个房间人体存在传感器在 10-09 18:40–10-09 20:29 全程无占用，入户门磁同期有开合记录</p>
+      <div class="lbl">参与判定的信号</div>
+      <div><span class="sig">厨房功率</span><span class="sig">全屋人体存在</span><span class="sig">入户门磁</span></div>
+    </div>
+    <div class="ev-right">
+      <div class="lbl">处置动作</div>
+      <ul class="acts"><li>语音播报：家中长辈设备立即语音提示（80 分贝，重复 3 遍）</li><li>App 强推：主事与全体成员，绕过免打扰</li><li>电话外呼：30 秒内未确认则自动呼叫紧急联系人</li><li>联动处置：切断对应回路电源 / 关闭燃气电磁阀（若已接入）</li><li>留痕：事件与处置时间线写入审计，可回溯</li></ul>
+    </div>
+  </div>
+</div>
+<div class="ev l2">
+  <div class="ev-h">
+    <span class="badge l2">二级</span>
+    <b class="ev-t">白天长时静止</b>
+    <span class="ev-loc">主卧</span>
+    <span class="ev-id">E05 · R4</span>
+  </div>
+  <div class="ev-meta">
+    <span><i>时间</i>10-10 14:50 → 2026-10-10 17:20</span>
+    <span><i>持续</i><b>150</b> 分钟</span>
+    <span><i>状态</i>待确认</span>
+  </div>
+  <div class="ev-body">
+    <div class="ev-left">
+      <div class="lbl">判据（可回溯到原始数据）</div>
+      <p class="quote">主卧人体存在传感器 10-10 14:50–10-10 17:20 连续占用 150 分钟，期间门磁无开合。平日起居无此模式（白天单间停留 ≥120 分钟从未出现）</p>
+      <div class="lbl">参与判定的信号</div>
+      <div><span class="sig">主卧人体存在</span><span class="sig">入户门磁</span></div>
+    </div>
+    <div class="ev-right">
+      <div class="lbl">处置动作</div>
+      <ul class="acts"><li>App 推送：按成员性格措辞，免打扰时段仅保留本条</li><li>家长版加一句：不制造恐慌，只陈述事实</li><li>连续 2 次或持续 ≥180 分钟 → 自动升级为一级</li><li>留痕：事件与判据写入审计</li></ul>
+    </div>
+  </div>
+</div>
+
+<h2>分级响应策略</h2>
+<div class="pol">
+  <div class="c l1c"><h4 style="color:#dc2626">一级 · 立即处置</h4>
+    <p>语音播报（80 分贝，重复 3 遍）· App 强推全体成员 · <b>30 秒未确认自动电话外呼紧急联系人</b> ·
+    联动断电 / 关燃气阀 · 全程留痕。<br><b>不受免打扰限制。</b></p></div>
+  <div class="c l2c"><h4 style="color:#d97706">二级 · 提醒观察</h4>
+    <p>App 推送，按成员性格措辞；免打扰时段<b>仅保留本条</b>；
+    连续 2 次或持续 ≥180 分钟<b>自动升级为一级</b>。</p></div>
+  <div class="c bd"><h4>机器边界</h4>
+    <p>机器只做<b>发现、分级、提醒</b>；最终处置必须由人确认。
+    <b>系统不替人下结论，也不做医学判断。</b></p></div>
+</div>
+
+<h2>触发规则（全部可解释）</h2>
+<table><thead><tr><th style="width:70px">规则</th><th>判据</th></tr></thead>
+<tbody><tr><td class="mono">R1</td><td>烟雾告警 → 一级</td></tr><tr><td class="mono">R2</td><td>水浸告警 → 一级</td></tr><tr><td class="mono">R3</td><td>厨房功率&gt;100W≥5min 且全屋无人 → 一级</td></tr><tr><td class="mono">R4</td><td>白天卧室连续占用≥120min 且无外出 → 二级</td></tr><tr><td class="mono">R5</td><td>夜间卫生间&gt;30min 且&gt;3×夜间中位 → 二级</td></tr></tbody></table>
+
+<div class="note">
+<b>为什么这些事件可信</b>：生成器只产生<b>行为序列</b>（门磁开合、功率曲线、人体进出、告警信号），
+<b>不产生任何标签字段</b>；上表 5 条全部由 <code>emergency.py</code> 反推得出。
+判据里的每个数字都能回到原始 CSV 复核 —— 这是"可回溯"的具体含义。
+</div>
+
+</div></body></html>

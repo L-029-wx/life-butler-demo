@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>因人而异 · 两个家庭对比</title>
+<style>
+:root{--ink:#0f172a;--body:#334155;--mut:#64748b;--line:#e2e8f0;--bg:#f5f7fb;--card:#fff;
+--pk:#ef4444;--fl:#f59e0b;--vl:#10b981;--a:#6366f1;--b:#0ea5e9}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);
+ font:14px/1.7 "Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:26px 22px 60px}
+h1{margin:0 0 4px;font-size:24px;color:var(--ink)}
+h1 b{background:linear-gradient(135deg,#6366f1,#0ea5e9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin:0 0 20px;color:var(--mut);font-size:13.5px}
+h2{font-size:17px;color:var(--ink);margin:30px 0 12px;padding-bottom:8px;border-bottom:2px solid #eef2ff}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hh{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.hh.a{border-top:4px solid var(--a)} .hh.b{border-top:4px solid var(--b)}
+.hh h3{margin:0 0 8px;font-size:15px;color:var(--ink)}
+.hh .tagline{font-size:12px;color:var(--mut);margin-bottom:10px}
+.hh ul{margin:0;padding-left:18px;font-size:13px}
+.hh li{margin:3px 0}
+
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);
+ border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th{background:#f8fafc;color:var(--mut);font-size:11.5px;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+td{padding:9px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.c{text-align:center} td.mut{color:var(--mut);font-size:12.5px}
+.mono{font-family:ui-monospace,Consolas,monospace;color:#4338ca;font-weight:600}
+.big{font-size:17px;font-weight:700;color:var(--ink)}
+.diff{color:#dc2626;font-weight:700}
+.yes{color:#059669;font-weight:600} .no{color:#cbd5e1}
+
+.bar{display:flex;height:16px;border-radius:8px;overflow:hidden;background:#f1f5f9;margin:6px 0 4px}
+.bar i{display:block} .bar .pk{background:var(--pk)} .bar .fl{background:var(--fl)} .bar .vl{background:var(--vl)}
+.barleg{font-size:11.5px;color:var(--mut)}
+.legend{display:flex;gap:16px;font-size:11.5px;color:var(--mut);margin:2px 0 10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+
+.note{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px 16px;font-size:12.5px;margin-top:14px}
+.note b{color:#b45309}
+.key{background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:14px 18px;font-size:13px;margin-top:12px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+
+<h1>同一套算法，<b>两个家庭，两种结论</b></h1>
+<p class="lead">用来验证「因人而异」：A 与 B 用<b>同一套判定规则、同一套指标口径、同一个电价表</b>，
+只有家庭行为不同。若系统真的做个性化，结论就必须跟着变——否则只是换了个皮肤。</p>
+
+<h2>两个家庭</h2>
+<div class="two">
+  <div class="hh a"><h3>A 家庭 · 三口一猫 · 双职工</h3>
+    <div class="tagline">早睡型 · 工作日整天外出 · 三处空调 · 有宠物</div>
+    <ul><li>作息：22:50 睡 / 06:50 起（周末 23:40 / 08:30）</li>
+        <li>外出：工作日 08:15–17:30</li>
+        <li>一周 <b>81.29</b> kWh，¥45.69</li></ul></div>
+  <div class="hh b"><h3>B 家庭 · 独居老人 · 72 岁</h3>
+    <div class="tagline">早睡早起 · 白天基本在家 · 空调少用 · 无宠物</div>
+    <ul><li>作息：21:05 睡 / 05:40 起（周末相同）</li>
+        <li>外出：每天仅买菜 45 分钟 + 散步 30 分钟</li>
+        <li>一周 <b>52.13</b> kWh，¥36.29</li></ul></div>
+</div>
+
+<h2>关键指标对照</h2>
+<table>
+<thead><tr><th style="width:170px">指标</th><th style="width:120px">A 家庭</th><th style="width:120px">B 家庭</th><th>差异怎么来的</th></tr></thead>
+<tbody>
+<tr><td>周用电</td><td class="big">81.29 kWh</td><td class="big">52.13 kWh</td>
+<td class="mut">B 只有 A 的 64% —— 无人上班通勤、空调少开</td></tr>
+<tr><td>周电费</td><td class="big">¥45.69</td><td class="big">¥36.29</td>
+<td class="mut">电费没有按用电同比例下降，因为 B 的用电更集中在峰段</td></tr>
+<tr><td><b>峰谷比</b></td><td class="big">0.469</td>
+<td class="big diff">1.754</td>
+<td class="mut"><b>方向完全相反</b>：A 谷段为主（夜里睡觉、空调过夜）；B 峰段为主（白天在家用电）</td></tr>
+<tr><td>综合电价</td><td>0.562 元/kWh</td><td class="diff">0.696 元/kWh</td>
+<td class="mut">峰谷比直接反映到均价上</td></tr>
+<tr><td>工作日 / 周末日均</td>
+<td>10.69 / 13.92</td>
+<td>7.46 / 7.42</td>
+<td class="mut">A 周末显著高于工作日；B 基本持平（每天在家，节律一致）</td></tr>
+<tr><td>入睡 / 起床（工作日）</td>
+<td>22:50 / 06:50</td>
+<td>21:05 / 05:40</td>
+<td class="mut">各自建立各自的基线，不由系统预设</td></tr>
+<tr><td>分析发现</td><td class="big">8 条</td><td class="big">4 条</td>
+<td class="mut">B 少 4 条 —— 不是数据少，是那些问题在 B 家不成立</td></tr>
+<tr><td>应急事件</td><td class="big">5 条</td><td class="big">0 条</td>
+<td class="mut">A 有 5 组注入场景；B 未注入，检测器<b>未误报</b></td></tr>
+</tbody></table>
+
+<h2>用电结构</h2>
+<div class="legend"><span><i style="background:var(--pk)"></i>峰 10-12 / 14-19</span>
+<span><i style="background:var(--fl)"></i>平 08-10 / 12-14 / 19-24</span>
+<span><i style="background:var(--vl)"></i>谷 00-08</span></div>
+<div class="hh a" style="margin-bottom:10px"><h3>A 家庭 · 峰谷比 0.47</h3><div class="bar"><i class="pk" style="width:20.8%"></i><i class="fl" style="width:35.0%"></i><i class="vl" style="width:44.2%"></i></div><div class="barleg">峰 16.88 · 平 28.45 · 谷 35.97 kWh</div></div>
+<div class="hh b"><h3>B 家庭 · 峰谷比 1.75</h3><div class="bar"><i class="pk" style="width:40.4%"></i><i class="fl" style="width:36.6%"></i><i class="vl" style="width:23.0%"></i></div><div class="barleg">峰 21.03 · 平 19.10 · 谷 11.99 kWh</div></div>
+
+<div class="key">
+<b>同一个「峰谷比」指标，两户的处置建议完全不同。</b><br>
+A 家夜里空调过夜，谷段本来就占多数 → 建议是「把洗衣、充电挪到 22:00 后」，能省的是零钱。<br>
+B 家白天全程在家，用电集中在峰段 → 建议应该是「午后空调提前预冷 + 大功率家务避开 14-19 点」，
+这属于结构性调整，省的钱比 A 多。<b>若系统给两户推同一条建议，就说明它没有真的在看这户人家。</b>
+</div>
+
+<h2>发现清单对照</h2>
+<table>
+<thead><tr><th style="width:60px">编号</th><th>发现</th><th style="width:60px" class="c">A</th>
+<th style="width:60px" class="c">B</th><th>为什么</th></tr></thead>
+<tbody><tr><td class="mono">F1</td><td>空调空转：房间没人却在制冷</td><td class="c"><span class="yes">有</span></td><td class="c"><span class="no">无</span></td><td class="mut">A 周五全家外出但客厅空调没关；B 白天在家，空调开机时人也在</td></tr><tr><td class="mono">F2</td><td>冰箱压缩机日运行时长高于基线</td><td class="c"><span class="yes">有</span></td><td class="c"><span class="no">无</span></td><td class="mut">A 的冰箱有两日负荷抬高；B 无此情形</td></tr><tr><td class="mono">F3</td><td>峰谷结构：谷段占 23.0%，仍有可延后负载落在峰/平段</td><td class="c"><span class="yes">有</span></td><td class="c"><span class="yes">有</span></td><td class="mut">两户都有，但方向相反（见峰谷比）</td></tr><tr><td class="mono">F4</td><td>夜间待机功耗形成「隐形续费」</td><td class="c"><span class="yes">有</span></td><td class="c"><span class="yes">有</span></td><td class="mut">两户都有 —— 路由器常开是共性问题</td></tr><tr><td class="mono">F5</td><td>宠物投喂次数低于日常节律</td><td class="c"><span class="yes">有</span></td><td class="c"><span class="no">无</span></td><td class="mut">B 无宠物，该域不适用</td></tr><tr><td class="mono">F6</td><td>作息基线已建立（工作日 / 周末双模式）</td><td class="c"><span class="yes">有</span></td><td class="c"><span class="yes">有</span></td><td class="mut">两户都有 —— 作息基线是通用能力</td></tr><tr><td class="mono">F7</td><td>家务负荷分布：做饭稳定、洗衣集中在工作日之外</td><td class="c"><span class="yes">有</span></td><td class="c"><span class="yes">有</span></td><td class="mut">两户都有 —— 家务节律是通用能力</td></tr><tr><td class="mono">F8</td><td>卫生间夜间滞留时长远超夜间基线</td><td class="c"><span class="yes">有</span></td><td class="c"><span class="no">无</span></td><td class="mut">A 有一晚滞留 60 分钟；B 起夜 4–5 分钟，在基线内</td></tr></tbody></table>
+
+<div class="note">
+<b>怎么看这张表</b>：4 条是两户共有（路由器常开、作息基线、家务节律这些通用能力），
+4 条只在 A 出现（<b>不是 B 的数据缺失，而是那些问题在 B 家确实不成立</b>），
+0 条只在 B 出现。<br>
+这正是「因人而异」应当呈现的样子：<b>共性从数据里长出来，差异从家庭里长出来</b>，
+而不是靠给不同人套不同的模板。
+</div>
+
+</div></body></html>

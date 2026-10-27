@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>应急处置 · 电子生活管家</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.emg-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:14px 0 18px}
+.emg-stats .stat.l1 b{color:#dc2626}
+.emg-stats .stat.l2 b{color:#d97706}
+.emg{background:#fff;border:1px solid var(--line,#e2e8f0);border-left:4px solid #cbd5e1;
+ border-radius:12px;padding:14px 18px;margin-bottom:12px}
+.emg.l1{border-left-color:#dc2626}
+.emg.l2{border-left-color:#d97706}
+.emg-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lv{font-size:11.5px;font-weight:700;padding:1px 9px;border-radius:999px}
+.lv.l1{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.lv.l2{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+.emg-t{font-size:15px;color:#0f172a;font-weight:600}
+.emg-loc{font-size:12px;color:#64748b;background:#f1f5f9;border-radius:6px;padding:1px 8px}
+.emg-id{margin-left:auto;font-size:11.5px;color:#94a3b8;font-family:ui-monospace,Consolas,monospace}
+.emg-meta{display:flex;gap:20px;font-size:12.5px;color:#64748b;margin:8px 0 10px;flex-wrap:wrap}
+.emg-meta i{font-style:normal;color:#94a3b8;margin-right:6px}
+.emg-body{display:grid;grid-template-columns:1fr 280px;gap:16px}
+.lbl{font-size:11px;color:#94a3b8;letter-spacing:.04em;margin:4px 0 3px}
+.evq{margin:0;background:#f8fafc;border-left:2px solid #cbd5e1;border-radius:0 6px 6px 0;
+ padding:8px 12px;font-size:12.5px;line-height:1.65;color:#475569}
+.sig{display:inline-block;font-size:11.5px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;
+ border-radius:999px;padding:1px 9px;margin:2px 4px 2px 0}
+.acts{margin:4px 0 0;padding-left:18px;font-size:12.5px;color:#475569}
+.acts li{margin:2px 0}
+.emg-op{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}
+.emg-op .st{font-size:12px;color:#64748b}
+.emg-op .st.ok{color:#059669;font-weight:600}
+.loginbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff;
+ border:1px solid var(--line,#e2e8f0);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px}
+.loginbar input{border:1px solid #e2e8f0;border-radius:8px;padding:5px 10px;font-size:13px;width:150px}
+.loginbar .who{margin-left:auto;font-size:12.5px;color:#64748b}
+.banner{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;
+ font-size:12.5px;margin-bottom:14px;display:none}
+.banner.show{display:block}
+</style></head><body>
+<div class="app"><aside class="sidebar"><div class="brand"><div class="logo">管</div>
+<div><b>电子生活管家</b><small>客户端原型</small></div></div>
+<nav><a class="nav-item" href="设备管理.html"><span class="ni-dot"></span>设备管理</a>
+<a class="nav-item on" href="应急处置.html"><span class="ni-dot"></span>应急处置</a>
+<a class="nav-item" href="宠物.html"><span class="ni-dot"></span>宠物<i class="wip">待完善</i></a>
+<a class="nav-item" href="健康检测.html"><span class="ni-dot"></span>健康检测<i class="wip">待完善</i></a>
+<a class="nav-item" href="分析建议.html"><span class="ni-dot"></span>分析建议</a>
+<a class="nav-item" href="基础设置.html"><span class="ni-dot"></span>基础设置<i class="wip">待完善</i></a></nav>
+<div class="side-foot">本页<b>接真实后端</b><br>连不上自动降级为快照</div></aside>
+<div class="main">
+<div class="crumb">客户端原型 / 应急处置</div>
+<h1>应急处置</h1>
+<p class="lead">机器只做<b>发现 → 分级 → 提醒</b>，<b>处置必须由人确认</b>。一级事件绕过免打扰，二级先提醒、连续 2 次或超 180 分钟自动升级。</p>
+
+<div class="banner" id="banner"></div>
+
+<div class="loginbar">
+  <span>处置操作需要登录：</span>
+  <input id="u" placeholder="账号" autocomplete="username">
+  <input id="p" type="password" placeholder="密码" autocomplete="current-password">
+  <button class="btn" id="btnLogin">登录</button>
+  <span class="who" id="who">未登录（只能查看）</span>
+</div>
+
+<div class="emg-stats">
+  <div class="stat"><span>应急事件</span><b id="k-total">5</b><small>本周期</small></div>
+  <div class="stat l1"><span>一级</span><b id="k-l1">3</b><small>立即处置</small></div>
+  <div class="stat l2"><span>二级</span><b id="k-l2">2</b><small>提醒观察</small></div>
+  <div class="stat"><span>待确认</span><b id="k-pending">5</b><small>需人工</small></div>
+  <div class="stat"><span>误报</span><b id="k-fp">0</b><small>人工标记</small></div>
+</div>
+
+<h2>事件清单</h2>
+<div id="list"></div>
+
+<h2>分级响应策略</h2>
+<div class="card" style="padding:14px 18px">
+<table class="table">
+<thead><tr><th style="width:90px">等级</th><th>含义</th><th>触达方式</th><th>免打扰</th><th>升级条件</th></tr></thead>
+<tbody>
+<tr><td><span class="lv l1">一级</span></td><td>人身或财产存在现实风险</td>
+<td>语音播报（80 分贝 ×3）· App 强推全体 · <b>30 秒未确认自动电话外呼紧急联系人</b> · 联动断电/关气</td>
+<td><b>不受限制</b></td><td>—</td></tr>
+<tr><td><span class="lv l2">二级</span></td><td>可疑行为，需人判断</td>
+<td>App 推送，按成员性格措辞</td><td>仅保留本条</td><td>连续 2 次 或 持续 ≥180 分钟 → 升一级</td></tr>
+</tbody></table>
+<p class="mut" style="margin:10px 0 0;font-size:12.5px">
+机器边界：系统<b>不替人下结论、不做医学判断</b>。误报必须由「主事」人工标记，用于后续降误报。</p>
+</div>
+
+</div></div>
+<script>
+/* 桌面 webview 不支持 alert/confirm，这里用页内提示 */
+function toast(msg, bad) {
+  var d = document.createElement("div");
+  d.textContent = msg;
+  d.style.cssText = "position:fixed;left:50%;bottom:26px;transform:translateX(-50%);" +
+    "background:" + (bad ? "#b3271e" : "#1d2733") + ";color:#fff;padding:10px 18px;" +
+    "border-radius:10px;font-size:14px;z-index:999;box-shadow:0 6px 20px rgba(0,0,0,.2)";
+  document.body.appendChild(d);
+  setTimeout(function () { d.remove(); }, 2600);
+}
+
+const SNAP = {"count": 5, "items": [{"rule": "R5", "level": "二级", "type": "夜间超长滞留", "start": "2026-10-06 02:10:00", "end": "2026-10-06 03:10:00", "duration_min": 60, "location": "卫生间", "evidence": "卫生间 10-06 02:10 起停留 60 分钟；同期其余夜间会话中位 6 分钟，超出 10.0 倍。仅记录时长事实，不作医学判断", "signals": ["卫生间人体存在"], "id": "E01", "actions": ["App 推送：按成员性格措辞，免打扰时段仅保留本条", "家长版加一句：不制造恐慌，只陈述事实", "连续 2 次或持续 ≥180 分钟 → 自动升级为一级", "留痕：事件与判据写入审计"], "policy": "安全类不受免打扰时段限制", "status": "待确认"}, {"rule": "R1", "level": "一级", "type": "烟雾告警", "start": "2026-10-06 12:38:00", "end": "2026-10-06 12:40:00", "duration_min": 2, "location": "厨房", "evidence": "厨房安防传感器于 10-06 12:38 上报「烟雾」超阈值告警，持续 2 分钟后恢复", "signals": ["安防传感器告警", "恢复信号"], "id": "E02", "actions": ["语音播报：家中长辈设备立即语音提示（80 分贝，重复 3 遍）", "App 强推：主事与全体成员，绕过免打扰", "电话外呼：30 秒内未确认则自动呼叫紧急联系人", "联动处置：切断对应回路电源 / 关闭燃气电磁阀（若已接入）", "留痕：事件与处置时间线写入审计，可回溯"], "policy": "安全类不受免打扰时段限制", "status": "待确认"}, {"rule": "R2", "level": "一级", "type": "水浸告警", "start": "2026-10-07 03:12:00", "end": "2026-10-07 03:18:00", "duration_min": 6, "location": "卫生间", "evidence": "卫生间安防传感器于 10-07 03:12 上报「水浸」超阈值告警，持续 6 分钟后恢复", "signals": ["安防传感器告警", "恢复信号"], "id": "E03", "actions": ["语音播报：家中长辈设备立即语音提示（80 分贝，重复 3 遍）", "App 强推：主事与全体成员，绕过免打扰", "电话外呼：30 秒内未确认则自动呼叫紧急联系人", "联动处置：切断对应回路电源 / 关闭燃气电磁阀（若已接入）", "留痕：事件与处置时间线写入审计，可回溯"], "policy": "安全类不受免打扰时段限制", "status": "待确认"}, {"rule": "R3", "level": "一级", "type": "外出未关火", "start": "2026-10-09 18:40:00", "end": "2026-10-09 19:23:00", "duration_min": 43, "location": "厨房", "evidence": "灶台 10-09 18:40–10-09 19:23 通电（累计 24 分钟功率 >100W），而全屋五个房间人体存在传感器在 10-09 18:40–10-09 20:29 全程无占用，入户门磁同期有开合记录", "signals": ["厨房功率", "全屋人体存在", "入户门磁"], "id": "E04", "actions": ["语音播报：家中长辈设备立即语音提示（80 分贝，重复 3 遍）", "App 强推：主事与全体成员，绕过免打扰", "电话外呼：30 秒内未确认则自动呼叫紧急联系人", "联动处置：切断对应回路电源 / 关闭燃气电磁阀（若已接入）", "留痕：事件与处置时间线写入审计，可回溯"], "policy": "安全类不受免打扰时段限制", "status": "待确认"}, {"rule": "R4", "level": "二级", "type": "白天长时静止", "start": "2026-10-10 14:50:00", "end": "2026-10-10 17:20:00", "duration_min": 150, "location": "主卧", "evidence": "主卧人体存在传感器 10-10 14:50–10-10 17:20 连续占用 150 分钟，期间门磁无开合。平日起居无此模式（白天单间停留 ≥120 分钟从未出现）", "signals": ["主卧人体存在", "入户门磁"], "id": "E05", "actions": ["App 推送：按成员性格措辞，免打扰时段仅保留本条", "家长版加一句：不制造恐慌，只陈述事实", "连续 2 次或持续 ≥180 分钟 → 自动升级为一级", "留痕：事件与判据写入审计"], "policy": "安全类不受免打扰时段限制", "status": "待确认"}]};
+const API = "http://127.0.0.1:8100";
+let TOKEN = localStorage.getItem("lb_token") || "";
+let USER  = localStorage.getItem("lb_user") || "";
+let DATA  = null;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function banner(msg, show){
+  const b = $("#banner");
+  b.textContent = msg || "";
+  b.classList.toggle("show", !!show);
+}
+
+function who(){
+  $("#who").textContent = TOKEN ? ("已登录：" + USER + "（可处置）") : "未登录（只能查看）";
+}
+
+function render(){
+  const items = DATA.items || [];
+  const l1 = items.filter(e => e.level === "一级").length;
+  const pend = items.filter(e => e.status === "待确认").length;
+  const fp = items.filter(e => e.status === "误报").length;
+  $("#k-total").textContent = items.length;
+  $("#k-l1").textContent = l1;
+  $("#k-l2").textContent = items.length - l1;
+  $("#k-pending").textContent = pend;
+  $("#k-fp").textContent = fp;
+
+  $("#list").innerHTML = items.map(e => {
+    const lv = e.level === "一级" ? "l1" : "l2";
+    const acts = (e.actions || []).map(a => "<li>" + esc(a) + "</li>").join("");
+    const sigs = (e.signals || "").split("+").map(s => s.trim()).filter(Boolean)
+                   .map(s => '<span class="sig">' + esc(s) + '</span>').join("");
+    const done = e.status !== "待确认";
+    return '<div class="emg ' + lv + '">'
+      + '<div class="emg-h"><span class="lv ' + lv + '">' + esc(e.level) + '</span>'
+      + '<span class="emg-t">' + esc(e.event_type) + '</span>'
+      + '<span class="emg-loc">' + esc(e.location) + '</span>'
+      + '<span class="emg-id">' + esc(e.code) + ' · ' + esc(e.rule_id) + '</span></div>'
+      + '<div class="emg-meta"><span><i>时间</i>' + esc(String(e.start_at).slice(5,16))
+      + ' → ' + esc(String(e.end_at || "").slice(11,16)) + '</span>'
+      + '<span><i>持续</i><b>' + esc(e.duration_min) + '</b> 分钟</span>'
+      + '<span><i>状态</i>' + esc(e.status) + '</span></div>'
+      + '<div class="emg-body"><div><div class="lbl">判据（可回溯到原始数据）</div>'
+      + '<p class="evq">' + esc(e.evidence) + '</p>'
+      + '<div class="lbl">参与判定的信号</div><div>' + sigs + '</div></div>'
+      + '<div><div class="lbl">处置动作</div><ul class="acts">' + acts + '</ul></div></div>'
+      + '<div class="emg-op">'
+      + '<button class="btn" data-ack="' + esc(e.code) + '" data-st="已确认" ' + (done ? "disabled" : "") + '>确认处置</button>'
+      + '<button class="btn" data-ack="' + esc(e.code) + '" data-st="误报" ' + (done ? "disabled" : "") + '>标记误报</button>'
+      + '<span class="st ' + (done ? "ok" : "") + '">' + (done ? "已由人工处理：" + esc(e.status) : "等待人工确认") + '</span>'
+      + '</div></div>';
+  }).join("");
+
+  document.querySelectorAll("[data-ack]").forEach(b => b.onclick = () => ack(b.dataset.ack, b.dataset.st));
+  who();
+}
+
+async function load(){
+  try{
+    const r = await fetch(API + "/api/emergency/events", {cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    DATA = await r.json();
+    banner("已连接真实后端：" + API + "（数据实时）", true);
+    $("#banner").style.background = "#ecfdf5";
+    $("#banner").style.borderColor = "#a7f3d0";
+  }catch(err){
+    DATA = SNAP;
+    banner("后端未连接（" + err.message + "），当前显示生成时内嵌快照。先启动后端再刷新即可操作。", true);
+    $("#banner").style.background = "#fffbeb";
+    $("#banner").style.borderColor = "#fcd34d";
+  }
+  render();
+}
+
+async function login(){
+  const u = $("#u").value.trim(), p = $("#p").value;
+  if(!u || !p){ toast("请输入账号与密码", true); return; }
+  try{
+    const r = await fetch(API + "/api/auth/login", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username:u, password:p})});
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.detail || ("HTTP " + r.status));
+    TOKEN = j.token; USER = j.user.display_name + "/" + j.user.role;
+    localStorage.setItem("lb_token", TOKEN);
+    localStorage.setItem("lb_user", USER);
+    if(j.must_change_password) toast("首次登录：正式使用前请先修改密码");
+    who(); load();
+  }catch(err){ toast("登录失败：" + err.message, true); }
+}
+
+async function ack(code, status){
+  if(!TOKEN){ toast("处置前请先登录", true); return; }
+  /* 原 confirm 在 webview 里不执行，改为直接提交：权限由后端校验（非主事返回 403） */
+  try{
+    const r = await fetch(API + "/api/emergency/events/" + code + "/ack", {
+      method:"POST",
+      headers:{"Content-Type":"application/json", "Authorization":"Bearer " + TOKEN},
+      body: JSON.stringify({status:status, by:USER.split("/")[0]})});
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.detail || ("HTTP " + r.status));
+    toast(code + " 已更新为「" + j.status + "」");
+    load();
+  }catch(err){ toast("操作失败：" + err.message, true); }
+}
+
+$("#btnLogin").onclick = login;
+$("#p").addEventListener("keydown", e => { if(e.key === "Enter") login(); });
+who(); load();
+</script>
+</body></html>

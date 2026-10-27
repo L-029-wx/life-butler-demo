@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>电子生活管家 · 毕业设计作品</title>
+<style>
+body{margin:0;background:#fdfbf4;color:#4a453c;line-height:1.8;
+  font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  background-image:radial-gradient(#e7e0d0 1px,transparent 1px);background-size:24px 24px}
+.wrap{max-width:720px;margin:0 auto;padding:56px 22px 80px}
+h1{font-family:"楷体","KaiTi",serif;font-size:38px;color:#26221c;font-weight:400;margin:0 0 6px}
+.sub{color:#8a8377;font-size:15px;margin:0 0 34px}
+.card{display:block;text-decoration:none;color:inherit;background:#fffdf7;padding:20px 22px;margin-bottom:14px;
+  border:2.4px solid #3a3630;box-shadow:3px 4px 0 rgba(38,34,28,.10);transition:.15s}
+.card:nth-child(odd){border-radius:255px 14px 225px 15px/15px 225px 15px 255px;transform:rotate(-.25deg)}
+.card:nth-child(even){border-radius:14px 255px 15px 225px/225px 15px 255px 15px;transform:rotate(.25deg)}
+.card:hover{background:#fff9e8;transform:translate(-1px,-1px) rotate(0);box-shadow:5px 6px 0 rgba(38,34,28,.16)}
+.card b{display:block;font-family:"楷体","KaiTi",serif;font-size:21px;color:#26221c;font-weight:400;margin-bottom:3px}
+.card span{font-size:13.5px;color:#8a8377}
+.tag{display:inline-block;font-size:11.5px;background:#ffe066;color:#26221c;padding:1px 8px;border-radius:20px;margin-left:8px;vertical-align:2px}
+footer{margin-top:36px;padding-top:16px;border-top:1px dashed #d7cfbf;font-size:13px;color:#8a8377}
+a.plain{color:#2c5f8a}
+</style></head><body><div class="wrap">
+<h1>电子生活管家</h1>
+<p class="sub">基于 Hive 的家庭生活感知数据分析与个性化生活助理系统<br>毕业设计作品演示 · 数据为模拟生成</p>
+
+<a class="card" href="家庭版.html"><b>家庭版<span class="tag">主入口</span></b>
+  <span>从家里人的角度看：今天有什么要你拿主意的事，每件都能一键处理</span></a>
+
+<a class="card" href="客户端原型/index.html"><b>客户端原型</b>
+  <span>6 个页面的低保真原型（设备管理 / 分析建议 / 应急处置 等）</span></a>
+
+<a class="card" href="demo-一周数据看板.html"><b>一周数据看板</b>
+  <span>一周 10 万行感知数据的多维分析结果与图表</span></a>
+
+<a class="card" href="应急功能演示.html"><b>应急功能演示</b>
+  <span>5 类异常场景的检出过程与分级响应</span></a>
+
+<a class="card" href="因人而异-两家庭对比.html"><b>因人而异对比</b>
+  <span>同一个人格模型，两个不同家庭得出完全不同的结论</span></a>
+
+<a class="card" href="家庭平面图-插件安装位置.html"><b>家庭平面图</b>
+  <span>9 个空间 / 28 个点位 / 6 个红外转发 / 全屋不装摄像头</span></a>
+
+<a class="card" href="分析架构图.html"><b>分析架构图</b>
+  <span>采集 → 数仓 → 分析 → 建议 → 传达 的五层结构</span></a>
+
+<footer>
+  <p>技术栈：Hive 4.2.0（数仓）· Python 3.11 + FastAPI（服务层）· ECharts（可视化）</p>
+  <p>演示说明：页面内的数据为按真实参数标定的模拟数据，用于展示分析方法；不是真实用户数据。
+  界面上的「推荐动作」在演示版中不会写入任何数据。</p>
+</footer>
+</div></body></html>

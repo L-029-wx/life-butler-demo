@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>电子生活管家 · 客户端功能结构图</title>
+<style>
+:root{--ink:#0f172a;--body:#334155;--mut:#64748b;--line:#e2e8f0;--bg:#f5f7fb;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);
+ font:14px/1.6 "Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;
+ -webkit-font-smoothing:antialiased}
+.wrap{max-width:1560px;margin:0 auto;padding:26px 20px 52px}
+h1{margin:0 0 6px;font-size:25px;color:var(--ink)}
+h1 b{background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:0;color:var(--mut);font-size:13.5px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0 4px;font-size:12.5px;color:var(--mut);align-items:center}
+.legend .box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;
+ display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tg{font-style:normal;font-size:11px;margin-left:4px}
+.tg.star{color:#dc2626;font-weight:700}
+.tg.ext{color:#0ea5e9}
+h2.sec{font-size:17px;color:var(--ink);margin:28px 0 12px}
+.cols{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;align-items:start}
+.col{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+ box-shadow:0 1px 3px rgba(15,23,42,.05)}
+.chead{padding:13px 15px 11px;border-bottom:3px solid var(--c);
+ background:linear-gradient(180deg,color-mix(in srgb,var(--c) 9%,#fff),#fff)}
+.cno{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;
+ background:var(--c);color:#fff;font-size:12px;font-weight:700;margin-bottom:6px}
+.cname{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:.5px}
+.cmeta{font-size:11.5px;color:var(--mut);margin-top:3px}
+.cmeta b{color:var(--c)}
+.cdesc{margin:0;padding:10px 15px;font-size:12px;color:var(--mut);background:#fafbfe;
+ border-bottom:1px solid var(--line);line-height:1.6}
+.cbody{padding:8px 13px 14px}
+.grp{margin-top:10px}
+.gn{font-size:12.5px;font-weight:700;color:var(--c);padding:4px 0 4px 9px;
+ border-left:3px solid var(--c);margin-bottom:3px}
+.grp ul{list-style:none;margin:0;padding:0 0 0 12px}
+.grp li{position:relative;font-size:12.5px;color:var(--body);padding:3.5px 0 3.5px 14px;line-height:1.5}
+.grp li:before{content:"";position:absolute;left:3px;top:12px;width:6px;height:6px;border-radius:50%;
+ background:color-mix(in srgb,var(--c) 45%,#fff);border:1px solid var(--c)}
+.grp li:after{content:"";position:absolute;left:6px;top:-6px;bottom:50%;width:1px;background:var(--line)}
+.grp li:first-child:after{display:none}
+.xwrap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.xc{background:var(--card);border:1px solid var(--line);border-left:3px solid #8b5cf6;border-radius:0 12px 12px 0;
+ padding:11px 15px}
+.xc b{display:block;color:var(--ink);font-size:13.5px;margin-bottom:2px}
+.xc span{font-size:12px;color:var(--mut)}
+.lays{display:grid;gap:9px}
+.lay{display:flex;gap:14px;align-items:baseline;background:var(--card);border:1px solid var(--line);
+ border-left:4px solid var(--c);border-radius:0 12px 12px 0;padding:11px 16px}
+.lay b{flex:0 0 66px;color:var(--c);font-size:13.5px}
+.lay span{font-size:12.5px;color:var(--body)}
+.note{background:#fff;border-left:3px solid #6366f1;border-radius:0 10px 10px 0;
+ padding:12px 16px;margin:14px 0;font-size:12.5px;line-height:1.7}
+.note b{color:var(--ink)}
+footer{margin-top:24px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mut)}
+@media(max-width:1320px){.cols{grid-template-columns:repeat(3,minmax(0,1fr))}.xwrap{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.cols{grid-template-columns:1fr}.xwrap{grid-template-columns:1fr}}
+@media print{body{background:#fff}.wrap{max-width:none;padding:0}.col{break-inside:avoid}
+ .cols{grid-template-columns:repeat(5,1fr);gap:8px}.cbody{padding:6px}.grp li{font-size:10px}}
+</style></head><body>
+<div class="wrap">
+<h1>电子生活管家 · <b>客户端功能结构图</b></h1>
+<p class="sub">5 大板块 · 共 <b>114</b> 项功能 —— 其中你点名必须实现的 <b>33</b> 项、我在其基础上扩展的 <b>52</b> 项</p>
+
+<div class="legend"><div class="box">
+  <span><i class="tg star">★</i> 你点名必须实现</span>
+  <span><i class="tg ext">◆</i> 我扩展的功能</span>
+  <span style="color:#94a3b8">（无标记 = 板块常规项）</span>
+</div></div>
+
+<div class="cols">
+<div class="col" style="--c:#6366f1">
+  <div class="chead">
+    <div class="cno">一</div>
+    <div class="cname">设备管理</div>
+    <div class="cmeta"><b>25</b> 项 · <b>4</b> 必做 · <b>8</b> 扩展</div>
+  </div>
+  <p class="cdesc">把「厂家各异的存量设备」变成「可分析的统一数据源」——设备接入时声明能力，平台映射到统一指标域</p>
+  <div class="cbody"><div class="grp"><div class="gn">1.1 接入与发现</div><ul><li>扫码配网（Wi-Fi / Zigbee / 蓝牙 Mesh）</li><li>局域网自动发现</li><li>手动添加（按数据能力归类）</li><li>设备能力声明 → 统一指标域映射<i class="tg star" title="你点名必须实现">★</i></li><li>第三方平台账号绑定（米家 / 涂鸦 / HomeKit）<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">1.2 设备清单</div><ul><li>按房间视图（对应平面图 9 个空间）</li><li>按类型视图</li><li>在线 / 离线 / 信号强度</li><li>电池电量（门磁 / 传感器）</li><li>计量点命名与用途标注<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">1.3 红外转发</div><ul><li>码库匹配（空调 / 电视 / 机顶盒 / 浴霸 / 晾衣架）<i class="tg star" title="你点名必须实现">★</i></li><li>遥控学习</li><li>按房间配置（红外不能穿墙，一间一个）<i class="tg star" title="你点名必须实现">★</i></li><li>遥控动作回传成事件 → 与功率曲线交叉验证<i class="tg star" title="你点名必须实现">★</i></li></ul></div><div class="grp"><div class="gn">1.4 自动化与场景</div><ul><li>离家自动关机（门磁 + 人体存在双确认）<i class="tg ext" title="我扩展的功能">◆</i></li><li>夜间策略（照明 / 空调）</li><li>峰谷错峰（可延后负载）</li><li>可视化规则编辑器<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">1.5 设备健康</div><ul><li>安全使用年限到期提醒（国标：冰箱空调 10 年 / 其余 8 年）</li><li>功率曲线异常（启停周期变化）</li><li>计量校准<i class="tg ext" title="我扩展的功能">◆</i></li><li>固件与网关管理</li></ul></div><div class="grp"><div class="gn">1.6 数据质量</div><ul><li>离线补数<i class="tg ext" title="我扩展的功能">◆</i></li><li>异常读数标记（不参与基线）<i class="tg ext" title="我扩展的功能">◆</i></li><li>数据保留策略<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div></div>
+</div>
+<div class="col" style="--c:#ec4899">
+  <div class="chead">
+    <div class="cno">二</div>
+    <div class="cname">宠物</div>
+    <div class="cmeta"><b>16</b> 项 · <b>5</b> 必做 · <b>9</b> 扩展</div>
+  </div>
+  <p class="cdesc">宠物照护是竞品普遍只做「投喂提醒」的浅水区；本项目把排泄称重纳入，使照护从「记得喂」推进到「看得见身体状态」</p>
+  <div class="cbody"><div class="grp"><div class="gn">2.1 宠物档案</div><ul><li>品种 / 年龄 / 体重 / 绝育 / 疫苗</li><li>多宠物分档管理<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">2.2 投喂与饮水</div><ul><li>投喂次数与时段</li><li>缺次提醒（低于基线众数即推送）<i class="tg star" title="你点名必须实现">★</i></li><li>饮水量监测<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">2.3 排泄称重</div><ul><li>排泄位置称量插件<i class="tg star" title="你点名必须实现">★</i></li><li>每次排泄量曲线<i class="tg star" title="你点名必须实现">★</i></li><li>频次统计（日 / 周）<i class="tg star" title="你点名必须实现">★</i></li><li>与进食、饮水量做关联分析<i class="tg ext" title="我扩展的功能">◆</i></li><li>异常提示（频次突增/骤减、单次量偏离）—— 只报事实、不下诊断<i class="tg star" title="你点名必须实现">★</i></li><li>猫砂盆清洁提醒<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">2.4 活动与陪伴</div><ul><li>独处时长（人体存在 + 门磁 → 家中无人时段）<i class="tg ext" title="我扩展的功能">◆</i></li><li>活动区域分布<i class="tg ext" title="我扩展的功能">◆</i></li><li>互动频次<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">2.5 照护日历</div><ul><li>驱虫 / 疫苗 / 体检提醒<i class="tg ext" title="我扩展的功能">◆</i></li><li>宠物照护周报<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div></div>
+</div>
+<div class="col" style="--c:#14b8a6">
+  <div class="chead">
+    <div class="cno">三</div>
+    <div class="cname">健康检测</div>
+    <div class="cmeta"><b>18</b> 项 · <b>8</b> 必做 · <b>7</b> 扩展</div>
+  </div>
+  <p class="cdesc">全屋不装摄像头，人体存在一律用毫米波雷达 —— 用「非侵入式」换「长辈愿意用」</p>
+  <div class="cbody"><div class="grp"><div class="gn">3.1 作息与睡眠</div><ul><li>入睡 / 起床基线（工作日与周末双模式）</li><li>夜间离床次数与时长<i class="tg star" title="你点名必须实现">★</i></li><li>睡眠环境（温湿度）</li></ul></div><div class="grp"><div class="gn">3.2 活动与久坐</div><ul><li>房间级活动轨迹（毫米波雷达，不采集图像）<i class="tg star" title="你点名必须实现">★</i></li><li>久坐提醒<i class="tg ext" title="我扩展的功能">◆</i></li><li>日活动量趋势<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">3.3 如厕与洗浴</div><ul><li>时长基线<i class="tg star" title="你点名必须实现">★</i></li><li>夜间异常滞留关注（只报事实，不贴标签）<i class="tg star" title="你点名必须实现">★</i></li><li>家属关注提醒<i class="tg star" title="你点名必须实现">★</i></li></ul></div><div class="grp"><div class="gn">3.4 室内环境健康</div><ul><li>温湿度</li><li>空气质量（PM2.5 / CO₂）<i class="tg ext" title="我扩展的功能">◆</i></li><li>通风提示（结合门窗开合）<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">3.5 长辈关怀</div><ul><li>同一模式重复出现 → 向家属推送<i class="tg star" title="你点名必须实现">★</i></li><li>用药 / 饮水提醒<i class="tg ext" title="我扩展的功能">◆</i></li><li>跌倒风险提示（毫米波雷达能力）<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">3.6 隐私边界（明确声明）</div><ul><li>全屋不装摄像头<i class="tg star" title="你点名必须实现">★</i></li><li>不采集生物特征<i class="tg star" title="你点名必须实现">★</i></li><li>健康数据分级授权<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div></div>
+</div>
+<div class="col" style="--c:#f59e0b">
+  <div class="chead">
+    <div class="cno">四</div>
+    <div class="cname">分析建议</div>
+    <div class="cmeta"><b>23</b> 项 · <b>7</b> 必做 · <b>5</b> 扩展</div>
+  </div>
+  <p class="cdesc">系统的出口。判定由可解释算法完成（可回溯），措辞才交给大模型 —— 判定与表达分离</p>
+  <div class="cbody"><div class="grp"><div class="gn">4.1 六大分析域</div><ul><li>能耗与物资</li><li>费用与消费</li><li>家务与作息</li><li>宠物照护</li><li>设备健康与预防维护</li><li>饮食与膳食</li><li>安全守护（选做）</li></ul></div><div class="grp"><div class="gn">4.2 FLQI 家庭生活品质指数</div><ul><li>分项得分</li><li>趋势与对比</li></ul></div><div class="grp"><div class="gn">4.3 综合简报</div><ul><li>正文以对话口吻呈现（像管家说话）<i class="tg star" title="你点名必须实现">★</i></li><li>数据以表格形式呈现<i class="tg star" title="你点名必须实现">★</i></li><li>按人格 / 代际切换语气<i class="tg star" title="你点名必须实现">★</i></li><li>渠道分发（语音 / App / 邮件）<i class="tg star" title="你点名必须实现">★</i></li></ul></div><div class="grp"><div class="gn">4.4 逐条建议</div><ul><li>等级（高 / 中 / 低）</li><li>证据与判据（可展开）</li><li>系统动作（一键执行）<i class="tg star" title="你点名必须实现">★</i></li><li>采纳 / 忽略 / 稍后<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">4.5 个性化基线</div><ul><li>个人基线 + 家庭画像<i class="tg star" title="你点名必须实现">★</i></li><li>同一结论、不同家庭给不同建议<i class="tg star" title="你点名必须实现">★</i></li></ul></div><div class="grp"><div class="gn">4.6 可解释与可回溯</div><ul><li>为什么这么判（因果归因 + 上下文剥离）<i class="tg ext" title="我扩展的功能">◆</i></li><li>数据来源与口径标注<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">4.7 闭环验证</div><ul><li>采纳记录 → FLQI 回写<i class="tg ext" title="我扩展的功能">◆</i></li><li>建议有效性统计<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div></div>
+</div>
+<div class="col" style="--c:#0ea5e9">
+  <div class="chead">
+    <div class="cno">五</div>
+    <div class="cname">基础设置</div>
+    <div class="cmeta"><b>32</b> 项 · <b>9</b> 必做 · <b>23</b> 扩展</div>
+  </div>
+  <p class="cdesc">你点了 AI / 算法 / 人员三项，我按「能不能让这套系统长期用得下去」补全了其余部分</p>
+  <div class="cbody"><div class="grp"><div class="gn">5.1 AI 设置</div><ul><li>大模型服务商与密钥<i class="tg star" title="你点名必须实现">★</i></li><li>判定 / 表达分离开关（判定用可解释算法，措辞才用 LLM）<i class="tg star" title="你点名必须实现">★</i></li><li>语气与人格配置（每位家庭成员各自的语气）<i class="tg star" title="你点名必须实现">★</i></li><li>语音音色 / 语速<i class="tg star" title="你点名必须实现">★</i></li><li>隐私开关（哪些数据可送云端）<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">5.2 算法设置</div><ul><li>基线窗口（≥30 天滚动）<i class="tg star" title="你点名必须实现">★</i></li><li>偏离阈值（MAD 倍数）<i class="tg star" title="你点名必须实现">★</i></li><li>上下文变量开关（气温 / 电价 / 日程）<i class="tg star" title="你点名必须实现">★</i></li><li>误报抑制（连续时长容忍度）<i class="tg ext" title="我扩展的功能">◆</i></li><li>算法版本与实验开关<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">5.3 人员与权限</div><ul><li>家庭成员（角色 / 代际 / 渠道偏好 / 语气）<i class="tg star" title="你点名必须实现">★</i></li><li>访客与临时成员<i class="tg ext" title="我扩展的功能">◆</i></li><li>权限分级（谁能改设备、谁能看健康数据）<i class="tg ext" title="我扩展的功能">◆</i></li><li>长辈模式 / 儿童模式<i class="tg star" title="你点名必须实现">★</i></li></ul></div><div class="grp"><div class="gn">5.4 数据与隐私</div><ul><li>本地 / 云端存储选择<i class="tg ext" title="我扩展的功能">◆</i></li><li>脱敏与授权范围<i class="tg ext" title="我扩展的功能">◆</i></li><li>数据导出与一键删除<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">5.5 通知与渠道</div><ul><li>App / 短信 / 微信 / 音箱 / 邮件<i class="tg ext" title="我扩展的功能">◆</i></li><li>免打扰时段<i class="tg ext" title="我扩展的功能">◆</i></li><li>推送频率上限<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">5.6 家庭画像</div><ul><li>户型与人数<i class="tg ext" title="我扩展的功能">◆</i></li><li>作息类型（早睡 / 晚睡）<i class="tg ext" title="我扩展的功能">◆</i></li><li>消费档位（影响建议力度）<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">5.7 电价与计费</div><ul><li>峰谷时段自定义<i class="tg ext" title="我扩展的功能">◆</i></li><li>阶梯电价设置<i class="tg ext" title="我扩展的功能">◆</i></li><li>电费账单导入比对<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">5.8 房间与空间</div><ul><li>对应平面图，可重命名 / 合并<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">5.9 系统</div><ul><li>时区 / 单位 / 语言<i class="tg ext" title="我扩展的功能">◆</i></li><li>备份与恢复<i class="tg ext" title="我扩展的功能">◆</i></li><li>日志与诊断<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div><div class="grp"><div class="gn">5.10 帮助与反馈</div><ul><li>使用引导与术语解释<i class="tg ext" title="我扩展的功能">◆</i></li><li>反馈入口<i class="tg ext" title="我扩展的功能">◆</i></li></ul></div></div>
+</div>
+</div>
+
+<h2 class="sec">横切关注点（贯穿五个板块）</h2>
+<div class="xwrap"><div class="xc"><b>数据与隐私</b><span>本地优先 · 脱敏 · 分级授权 · 可导出可删除</span></div><div class="xc"><b>通知与渠道</b><span>语音 / App / 短信 / 微信 / 音箱 / 邮件 · 免打扰</span></div><div class="xc"><b>家庭画像</b><span>户型 · 人数 · 作息类型 · 消费档位 —— 决定建议怎么给</span></div><div class="xc"><b>权限与角色</b><span>家庭成员 / 访客 · 设备权限与健康数据权限分开</span></div></div>
+
+<h2 class="sec">客户端在系统中的位置</h2>
+<div class="lays"><div class="lay" style="--c:#6366f1"><b>客户端</b><span>App · 小程序 · 音箱 · Web（本图即此层）</span></div><div class="lay" style="--c:#f59e0b"><b>服务层</b><span>基线引擎 · 判断与建议层 · 传达层（人格渲染）</span></div><div class="lay" style="--c:#14b8a6"><b>数据层</b><span>Hive 四层数仓：ODS → DWD → DWS（宽表）→ ADS</span></div><div class="lay" style="--c:#0ea5e9"><b>采集层</b><span>28 个点位：计量插座 · 门磁 · 毫米波雷达 · 温湿度 · 红外转发</span></div></div>
+
+<div class="note">
+  <b>设计说明 · 三条贯穿原则</b><br>
+  ① <b>判定与表达分离</b>：结论由可解释算法给出（可回溯），大模型只负责把结论说成人话 —— 所以「基础设置」里 AI 与算法是<b>分开</b>的两块，不是一块。<br>
+  ② <b>能力声明式接入</b>：存量设备厂家各异，设备接入时声明自己能提供哪些字段，平台映射到统一指标域 —— 这是「设备管理」里那条 ★ 的由来。<br>
+  ③ <b>非侵入式换接受度</b>：健康检测全程不用摄像头、不采生物特征，用毫米波雷达；隐私边界是<b>写在设置里可查</b>的，不是一句口号。
+</div>
+
+<footer>
+  <b>说明</b>：本图为客户端（表现层）的功能结构。数据层与服务层见 <code>分析架构图.html</code>；
+  采集点位见 <code>家庭平面图-插件安装位置.html</code>。标注的 ★/◆ 便于区分「你点名的必做项」与「扩展项」，定稿时可一并去掉。
+</footer>
+</div>
+</body></html>

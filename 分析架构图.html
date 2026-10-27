@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>电子生活管家 · 总体架构 v3</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 32px 40px;
+    background: #020617;
+    background-image:
+      linear-gradient(rgba(30,41,59,.55) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30,41,59,.55) 1px, transparent 1px);
+    background-size: 40px 40px;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+                 "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", monospace;
+    color: #e2e8f0;
+  }
+  .head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #34d399;
+         box-shadow: 0 0 0 0 rgba(52,211,153,.7); animation: pulse 2.2s infinite; }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(52,211,153,.7); }
+    70%  { box-shadow: 0 0 0 10px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+  }
+  h1 { font-size: 17px; font-weight: 600; margin: 0; letter-spacing: .5px; }
+  .sub { font-size: 11px; color: #64748b; margin: 0 0 18px 21px; letter-spacing: .4px; }
+  .card-svg { border: 1px solid #1e293b; border-radius: 12px; background: rgba(2,6,23,.72); padding: 8px; overflow-x: auto; }
+  svg { display: block; width: 100%; height: auto; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+  .card { border: 1px solid #1e293b; border-radius: 10px; padding: 14px 16px; background: rgba(15,23,42,.7); }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .cyan { background: #22d3ee; } .amber { background: #fbbf24; } .rose { background: #fb7185; }
+  .card h3 { font-size: 12px; font-weight: 600; margin: 0; letter-spacing: .3px; }
+  .card ul { margin: 0; padding: 0; list-style: none; }
+  .card li { font-size: 10.5px; color: #94a3b8; line-height: 1.85; }
+  .card li::before { content: "•"; color: #475569; margin-right: 6px; }
+  footer { margin-top: 18px; font-size: 10px; color: #475569; letter-spacing: .3px; }
+</style>
+</head>
+<body>
+
+<div class="head"><span class="dot"></span><h1>电子生活管家 · 总体架构 v3</h1></div>
+<p class="sub">L0–L7 九层链路 + 设备能力兼容层 + 双贯穿带 + 闭环验证 · 数据自下而上流动</p>
+
+<div class="card-svg">
+<svg viewBox="0 0 1360 1500" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono','Microsoft YaHei','PingFang SC',monospace">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+    </pattern>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arwA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arwO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#fb923c"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1360" height="1500" fill="url(#grid)"/>
+
+  <!-- ============ 连接线（底层） ============ -->
+  <g stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#arw)">
+    <line x1="690" y1="1254" x2="690" y2="1230"/>
+    <line x1="690" y1="1100" x2="690" y2="1076"/>
+    <line x1="690" y1="906"  x2="690" y2="882"/>
+    <line x1="690" y1="756"  x2="690" y2="732"/>
+    <line x1="690" y1="560"  x2="690" y2="536"/>
+    <line x1="690" y1="360"  x2="690" y2="336"/>
+    <line x1="690" y1="200"  x2="690" y2="176"/>
+  </g>
+  <g stroke="#fbbf24" stroke-width="1.5" fill="none" stroke-dasharray="5,3">
+    <line x1="1104" y1="640" x2="1118" y2="640" marker-end="url(#arwA)"/>
+    <line x1="1118" y1="500" x2="1104" y2="500" marker-end="url(#arwA)"/>
+  </g>
+  <g stroke="#fb923c" stroke-width="1.5" fill="none" stroke-dasharray="5,3">
+    <line x1="254" y1="450" x2="276" y2="450" marker-end="url(#arwO)"/>
+  </g>
+
+  <!-- ================= L7 闭环验证 ================= -->
+  <g>
+    <rect x="272" y="88" width="836" height="88" rx="10" fill="none" stroke="#4c1d3a" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="280" y="105" fill="#fb7185" font-size="9.5" letter-spacing="1">L7 · 闭环验证</text>
+    <rect x="280" y="116" width="260" height="52" rx="6" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
+    <text x="410" y="137" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">采纳记录</text>
+    <text x="410" y="154" text-anchor="middle" fill="#94a3b8" font-size="9">采纳 / 忽略 / 稍后 三态回传</text>
+    <rect x="560" y="116" width="260" height="52" rx="6" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
+    <text x="690" y="137" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">指标改善比对</text>
+    <text x="690" y="154" text-anchor="middle" fill="#94a3b8" font-size="9">建议前后指标对比</text>
+    <rect x="840" y="116" width="260" height="52" rx="6" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
+    <text x="970" y="137" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">FLQI 变化</text>
+    <text x="970" y="154" text-anchor="middle" fill="#94a3b8" font-size="9">效果证据回写</text>
+  </g>
+
+  <!-- ================= L6 建议传达层 ================= -->
+  <g>
+    <rect x="272" y="200" width="836" height="136" rx="10" fill="none" stroke="#065f46" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="280" y="217" fill="#34d399" font-size="9.5" letter-spacing="1">L6 · 建议传达层</text>
+    <rect x="280" y="228" width="390" height="52" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="475" y="249" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">受众判定</text>
+    <text x="475" y="266" text-anchor="middle" fill="#94a3b8" font-size="9">个人级 / 家庭级 → 决定渠道范围</text>
+    <rect x="690" y="228" width="390" height="52" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="885" y="249" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">语气渲染器 Tone Renderer</text>
+    <text x="885" y="266" text-anchor="middle" fill="#94a3b8" font-size="9">同一建议 · 儿童 / 长辈 / 成人 三种说法</text>
+    <rect x="280" y="292" width="195" height="36" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.2"/>
+    <text x="377" y="315" text-anchor="middle" fill="#cbd5e1" font-size="10.5">电话手表 · 儿童</text>
+    <rect x="485" y="292" width="195" height="36" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.2"/>
+    <text x="582" y="315" text-anchor="middle" fill="#cbd5e1" font-size="10.5">语音为主 · 长辈</text>
+    <rect x="690" y="292" width="195" height="36" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.2"/>
+    <text x="787" y="315" text-anchor="middle" fill="#cbd5e1" font-size="10.5">APP · 客户端 · 成人</text>
+    <rect x="895" y="292" width="195" height="36" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.2"/>
+    <text x="992" y="315" text-anchor="middle" fill="#cbd5e1" font-size="10.5">实体屏 · 家庭级</text>
+  </g>
+
+  <!-- ================= L5 判断与建议层 ================= -->
+  <g>
+    <rect x="272" y="360" width="836" height="176" rx="10" fill="none" stroke="#164e63" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="280" y="377" fill="#22d3ee" font-size="9.5" letter-spacing="1">L5 · 判断与建议层</text>
+    <rect x="280" y="388" width="390" height="52" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="475" y="409" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">判断引擎</text>
+    <text x="475" y="426" text-anchor="middle" fill="#94a3b8" font-size="9">阈值 · 基线偏离 · 趋势 · 组合规则</text>
+    <rect x="690" y="388" width="390" height="52" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="885" y="409" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">建议库</text>
+    <text x="885" y="426" text-anchor="middle" fill="#94a3b8" font-size="9">动作 · 数据依据 · 优先级 · 预期效果</text>
+    <rect x="280" y="448" width="800" height="38" rx="6" fill="rgba(120,53,15,0.30)" stroke="#fbbf24" stroke-width="1.4"/>
+    <text x="680" y="472" text-anchor="middle" fill="#fcd34d" font-size="10.5" font-weight="600">★ 上下文归因判定 · 后门调整剥离气温/电价混杂，取残差判定</text>
+    <text x="680" y="485" text-anchor="middle" fill="#a16207" font-size="8.5">实验：PR-AUC 0.078 → 0.376（×4.8）· 漏报 −47% · 误报成因已定位</text>
+    <rect x="280" y="494" width="800" height="32" rx="6" fill="rgba(120,53,15,0.28)" stroke="#fbbf24" stroke-width="1.3"/>
+    <text x="680" y="514" text-anchor="middle" fill="#fcd34d" font-size="10.5">家庭画像适配（H1–H6）· 同一结论不同家庭给不同建议 · 敏感话题语气纪律</text>
+  </g>
+
+  <!-- ================= L4 主题分析与指标层 ================= -->
+  <g>
+    <rect x="272" y="560" width="836" height="172" rx="10" fill="none" stroke="#164e63" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="280" y="577" fill="#22d3ee" font-size="9.5" letter-spacing="1">L4 · 主题分析与指标层（ADS 数据集市）</text>
+    <rect x="280" y="588" width="128" height="58" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.4"/>
+    <text x="344" y="613" text-anchor="middle" fill="#e2e8f0" font-size="11">能耗与物资</text>
+    <text x="344" y="630" text-anchor="middle" fill="#94a3b8" font-size="8">峰谷·耗材</text>
+    <rect x="417" y="588" width="128" height="58" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.4"/>
+    <text x="481" y="613" text-anchor="middle" fill="#e2e8f0" font-size="11">费用与消费</text>
+    <text x="481" y="630" text-anchor="middle" fill="#94a3b8" font-size="8">八大类·订阅</text>
+    <rect x="554" y="588" width="128" height="58" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.4"/>
+    <text x="618" y="613" text-anchor="middle" fill="#e2e8f0" font-size="11">家务与作息</text>
+    <text x="618" y="630" text-anchor="middle" fill="#94a3b8" font-size="8">基尼·规律度</text>
+    <rect x="691" y="588" width="128" height="58" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.4"/>
+    <text x="755" y="613" text-anchor="middle" fill="#e2e8f0" font-size="11">宠物照护</text>
+    <text x="755" y="630" text-anchor="middle" fill="#94a3b8" font-size="8">独处·进食</text>
+    <rect x="828" y="588" width="128" height="58" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.4"/>
+    <text x="892" y="613" text-anchor="middle" fill="#e2e8f0" font-size="11">设备健康</text>
+    <text x="892" y="630" text-anchor="middle" fill="#94a3b8" font-size="8">故障征兆</text>
+    <rect x="965" y="588" width="128" height="58" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.4"/>
+    <text x="1029" y="613" text-anchor="middle" fill="#e2e8f0" font-size="11">饮食与膳食</text>
+    <text x="1029" y="630" text-anchor="middle" fill="#94a3b8" font-size="8">三餐·临期</text>
+    <rect x="280" y="656" width="800" height="30" rx="6" fill="rgba(52,211,153,0.16)" stroke="#34d399" stroke-width="1.3"/>
+    <text x="680" y="675" text-anchor="middle" fill="#6ee7b7" font-size="10">＋ 成本模型（跨域）：设备更换支出预测（12 个月）· 设备剩余寿命 · 到期集中度指数</text>
+    <rect x="280" y="692" width="800" height="30" rx="6" fill="rgba(120,53,15,0.30)" stroke="#fbbf24" stroke-width="1.3"/>
+    <text x="680" y="712" text-anchor="middle" fill="#fcd34d" font-size="10.5" font-weight="600">FLQI 家庭生活品质指数（北极星 · 6 分项加权）</text>
+  </g>
+
+  <!-- ================= L3 数据加工层 ================= -->
+  <g>
+    <rect x="272" y="756" width="836" height="126" rx="10" fill="none" stroke="#065f46" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="280" y="773" fill="#34d399" font-size="9.5" letter-spacing="1">L3 · 数据加工层（DWS / DWD）</text>
+    <rect x="280" y="784" width="260" height="52" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="410" y="805" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">DWD 明细清洗</text>
+    <text x="410" y="822" text-anchor="middle" fill="#94a3b8" font-size="9">去重 · 维度关联 · 时间补全</text>
+    <rect x="560" y="784" width="260" height="52" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="690" y="805" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">DWS 主题宽表</text>
+    <text x="690" y="822" text-anchor="middle" fill="#94a3b8" font-size="9">日·周·月 × 成员·房间·设备</text>
+    <rect x="840" y="784" width="260" height="52" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="970" y="805" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">指标字典 · 口径</text>
+    <text x="970" y="822" text-anchor="middle" fill="#94a3b8" font-size="9">原子 → 派生 → 复合</text>
+    <rect x="280" y="844" width="800" height="30" rx="6" fill="rgba(56,189,248,0.14)" stroke="#38bdf8" stroke-width="1.3"/>
+    <text x="680" y="863" text-anchor="middle" fill="#7dd3fc" font-size="10">＋ 上下文维度合入 · 两路按时间戳对齐，外部信息作解释变量（⚠ 不进分子分母）</text>
+  </g>
+
+  <!-- ================= L2 接入与存储层 + 兼容层 ================= -->
+  <g>
+    <rect x="272" y="906" width="836" height="170" rx="10" fill="none" stroke="#4c1d95" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="280" y="923" fill="#a78bfa" font-size="9.5" letter-spacing="1">L2 · 数据接入与存储层（ODS）</text>
+    <rect x="280" y="934" width="260" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="410" y="955" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">Hive ODS · 事件表</text>
+    <text x="410" y="972" text-anchor="middle" fill="#94a3b8" font-size="9">门磁·人体·插座·开合</text>
+    <rect x="560" y="934" width="260" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="690" y="955" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">Hive ODS · 时序表</text>
+    <text x="690" y="972" text-anchor="middle" fill="#94a3b8" font-size="9">环境·功率·消费·电价天气</text>
+    <rect x="840" y="934" width="260" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="970" y="955" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="600">Kettle 抽取加载</text>
+    <text x="970" y="972" text-anchor="middle" fill="#94a3b8" font-size="9">调度 · 增量导入</text>
+    <rect x="280" y="994" width="800" height="72" rx="6" fill="rgba(120,53,15,0.30)" stroke="#fbbf24" stroke-width="1.6"/>
+    <text x="680" y="1016" text-anchor="middle" fill="#fcd34d" font-size="11.5" font-weight="600">★ 设备能力兼容层 —— 按「数据能力」归类，而非按「设备品类」</text>
+    <text x="680" y="1035" text-anchor="middle" fill="#e2e8f0" font-size="9.5">设备接入时声明可提供的字段 → 映射到统一指标域（功率/电量/开合/在位/环境/金额…）</text>
+    <text x="680" y="1054" text-anchor="middle" fill="#a16207" font-size="9">两路数据源同一张映射表 ⇒ 新设备免改分析逻辑 · 设备换代不触发系统重做</text>
+  </g>
+
+  <!-- ================= L1 数据生成 / 获取层 ================= -->
+  <g>
+    <rect x="272" y="1100" width="836" height="130" rx="10" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="280" y="1117" fill="#94a3b8" font-size="9.5" letter-spacing="1">L1 · 数据生成 / 获取层</text>
+    <rect x="280" y="1128" width="820" height="92" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+    <text x="690" y="1151" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">家庭感知数据生成器 —— 只生成行为序列，不生成任何标签</text>
+    <text x="690" y="1173" text-anchor="middle" fill="#94a3b8" font-size="9.5">参数标定：国家统计局《全国时间利用调查公报》· 居民消费支出分类 · 公开居民用电负荷研究 · 宠物行为学文献</text>
+    <text x="690" y="1192" text-anchor="middle" fill="#8b9bb4" font-size="9.5">覆盖 ≥ 60–90 天 · 满足 ≥ 1 万条量级 · 外部基准须标注来源与年份</text>
+    <text x="690" y="1210" text-anchor="middle" fill="#64748b" font-size="9">公开数据集（REFIT / UK-DALE / CASAS）用于 NILM 分解精度与方法验证</text>
+  </g>
+
+  <!-- ================= L0 数据来源层 ================= -->
+  <g>
+    <rect x="272" y="1254" width="836" height="128" rx="10" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="6,4"/>
+    <text x="280" y="1271" fill="#94a3b8" font-size="9.5" letter-spacing="1">L0 · 数据来源层（存量设备 + 网络侧）</text>
+    <rect x="280" y="1282" width="400" height="86" rx="6" fill="rgba(56,189,248,0.12)" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="480" y="1304" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="600">① 设备侧 —— 大件不动，加装小器械</text>
+    <text x="480" y="1324" text-anchor="middle" fill="#cbd5e1" font-size="9">计量插座（¥59）· 回路计量 CT · 门磁（¥47）</text>
+    <text x="480" y="1341" text-anchor="middle" fill="#cbd5e1" font-size="9">人体存在传感器（µm 波 ¥54）· 环境传感器 · 红外转发</text>
+    <text x="480" y="1358" text-anchor="middle" fill="#64748b" font-size="8.5">PIR 静止即失效 → 选毫米波（不生成图像，隐私友好）</text>
+    <rect x="700" y="1282" width="400" height="86" rx="6" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="900" y="1304" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="600">② 网络侧 —— 外部实时信息</text>
+    <text x="900" y="1324" text-anchor="middle" fill="#cbd5e1" font-size="9">峰谷电价 · 天气与气温 · 消费流水 · 日程位置</text>
+    <text x="900" y="1341" text-anchor="middle" fill="#cbd5e1" font-size="9">★ NILM：仅凭一个总表即可分解出分设备用电</text>
+    <text x="900" y="1358" text-anchor="middle" fill="#64748b" font-size="8.5">⚠ 加装小器械是过渡手段，非终局；价值在「换设备不换平台」</text>
+  </g>
+
+  <!-- ================= 左侧贯穿带：家庭画像 ================= -->
+  <g>
+    <rect x="40" y="360" width="210" height="170" rx="10" fill="rgba(251,146,60,0.10)" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="7,4"/>
+    <text x="145" y="382" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="600">家庭画像</text>
+    <text x="145" y="396" text-anchor="middle" fill="#a1603a" font-size="8.5">Household Profile</text>
+    <rect x="56" y="406" width="178" height="34" rx="5" fill="rgba(251,146,60,0.18)" stroke="#fb923c" stroke-width="1.1"/>
+    <text x="145" y="427" text-anchor="middle" fill="#e2e8f0" font-size="10">冷启动问卷（先验）</text>
+    <rect x="56" y="446" width="178" height="34" rx="5" fill="rgba(251,146,60,0.18)" stroke="#fb923c" stroke-width="1.1"/>
+    <text x="145" y="467" text-anchor="middle" fill="#e2e8f0" font-size="10">行为反推（后验）</text>
+    <rect x="56" y="486" width="178" height="34" rx="5" fill="rgba(251,146,60,0.18)" stroke="#fb923c" stroke-width="1.1"/>
+    <text x="145" y="507" text-anchor="middle" fill="#e2e8f0" font-size="10">六类家庭 H1–H6</text>
+  </g>
+
+  <!-- ================= 右侧贯穿带：个性化基线引擎 ================= -->
+  <g>
+    <rect x="1118" y="560" width="212" height="272" rx="10" fill="rgba(120,53,15,0.18)" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="7,4"/>
+    <text x="1224" y="582" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">★ 个性化基线引擎</text>
+    <text x="1224" y="596" text-anchor="middle" fill="#a16207" font-size="8.5">贯穿 L3–L5</text>
+    <rect x="1134" y="610" width="180" height="42" rx="5" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.1"/>
+    <text x="1224" y="629" text-anchor="middle" fill="#e2e8f0" font-size="10">个人画像标签推导</text>
+    <text x="1224" y="643" text-anchor="middle" fill="#94a3b8" font-size="8">作息型·家务度·节能意识</text>
+    <rect x="1134" y="658" width="180" height="42" rx="5" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.1"/>
+    <text x="1224" y="677" text-anchor="middle" fill="#e2e8f0" font-size="10">个人基线建模</text>
+    <text x="1224" y="691" text-anchor="middle" fill="#94a3b8" font-size="8">冷启动 → 基线 → 稳态</text>
+    <rect x="1134" y="706" width="180" height="42" rx="5" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.1"/>
+    <text x="1224" y="725" text-anchor="middle" fill="#e2e8f0" font-size="10">偏离检测（上下文归因）</text>
+    <text x="1224" y="739" text-anchor="middle" fill="#94a3b8" font-size="8">比用户更早发现自己</text>
+    <rect x="1134" y="754" width="180" height="42" rx="5" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.1"/>
+    <text x="1224" y="773" text-anchor="middle" fill="#e2e8f0" font-size="10">个性化建议生成</text>
+    <text x="1224" y="787" text-anchor="middle" fill="#94a3b8" font-size="8">适应度曲线可评估</text>
+  </g>
+
+  <!-- ================= 图例 ================= -->
+  <g font-size="9.5" fill="#94a3b8">
+    <rect x="272" y="1424" width="14" height="10" rx="2" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.2"/>
+    <text x="292" y="1433">生成 / 获取</text>
+    <rect x="384" y="1424" width="14" height="10" rx="2" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.2"/>
+    <text x="404" y="1433">存储 ODS</text>
+    <rect x="486" y="1424" width="14" height="10" rx="2" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.2"/>
+    <text x="506" y="1433">加工 / 触达</text>
+    <rect x="612" y="1424" width="14" height="10" rx="2" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.2"/>
+    <text x="632" y="1433">分析域 / 判断建议</text>
+    <rect x="778" y="1424" width="14" height="10" rx="2" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.2"/>
+    <text x="798" y="1433">★ 兼容层 / 上下文归因 / 引擎 / FLQI</text>
+    <rect x="1064" y="1424" width="14" height="10" rx="2" fill="rgba(56,189,248,0.14)" stroke="#38bdf8" stroke-width="1.2"/>
+    <text x="1084" y="1433">数据来源 / 上下文维度</text>
+  </g>
+</svg>
+</div>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-header"><div class="card-dot cyan"></div><h3>链路要点</h3></div>
+    <ul>
+      <li>九层：来源 → 生成 → 存储 → 加工 → 分析 → 判断建议 → 传达 → 验证</li>
+      <li>数仓四层 ODS→DWD→DWS→ADS</li>
+      <li>双贯穿：个性化引擎 + 家庭画像</li>
+      <li>北极星 FLQI，指标 95+ 项</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-dot amber"></div><h3>v3 新增的三个硬机制</h3></div>
+    <ul>
+      <li>设备能力兼容层：按数据能力归类，换代不重做系统</li>
+      <li>上下文归因：后门调整剥离气温/电价混杂</li>
+      <li>成本模型：设备更换支出预测 + 到期集中度</li>
+      <li>口径纪律：外部字段只进判断依据，不进分子分母</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-dot rose"></div><h3>科学性与隐私</h3></div>
+    <ul>
+      <li>模拟数据 + 参数标定（参数有真出处）</li>
+      <li>生成器只产行为，不产标签（防循环论证）</li>
+      <li>低敏路线：不采生物特征、不用摄像头</li>
+      <li>隐私：公共屏不放个人建议；外部渠道只发结论</li>
+    </ul>
+  </div>
+</div>
+
+<footer>电子生活管家 · 总体架构 v3 · 2026-10-11 · 配套：毕设蓝图-电子生活管家.md</footer>
+
+</body>
+</html>
