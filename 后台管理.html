@@ -767,6 +767,13 @@ async function vAnalysis() {
             FD_CHART.setOption(opt);
         }
 
+        /* 把每一行接上点击 → 展开它自己的证据图 */
+        FIND_CACHE = {};
+        fi.items.forEach(function (f) { FIND_CACHE[f.code] = f; });
+        document.querySelectorAll("#view tr.frow").forEach(function (tr) {
+            tr.onclick = function () { showFinding(tr.dataset.f, tr); };
+        });
+
         Object.keys(CAP).forEach(function (id) {
             const el = document.getElementById(id);
             if (el) { el.insertAdjacentHTML("afterend", '<p class="cap">' + CAP[id]() + '</p>'); }
